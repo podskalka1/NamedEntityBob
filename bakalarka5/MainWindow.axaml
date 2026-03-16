@@ -16,27 +16,36 @@
             </MenuItem>
         </Menu>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer x:Name="DocumentScroll"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Auto">
             <ItemsControl x:Name="ParagraphsItemsControl">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Vertical" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="local:ParagraphItem">
-                        <ItemsControl ItemsSource="{Binding Tokens}" Margin="0,0,0,12">
+                        <ItemsControl ItemsSource="{Binding Lines}"
+                                      Margin="0,0,0,12"
+                                      Width="{Binding #DocumentScroll.Bounds.Width}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <WrapPanel />
+                                    <StackPanel Orientation="Vertical"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="local:TokenItem">
-                                    <TextBlock Text="{Binding Text}" />
+                                <DataTemplate x:DataType="local:LineItem">
+                                    <ItemsControl ItemsSource="{Binding Tokens}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="local:TokenItem">
+                                                <TextBlock Text="{Binding Text}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

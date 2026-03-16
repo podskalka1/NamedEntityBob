@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+
     }
 
     private async void FileOpenMenuItem(object? sender, RoutedEventArgs e)
@@ -30,48 +31,78 @@ public partial class MainWindow : Window
 
         XDocument doc = XDocument.Parse(text);
 
-        _paragraphs = new List<ParagraphItem>();
+        var paragraphs = new List<ParagraphItem>();
 
         foreach (var p in doc.Descendants("p"))
         {
-            var paragraph = new ParagraphItem();
-            ParseNodesIntoTokens(p.Nodes(), paragraph.Tokens);
-            _paragraphs.Add(paragraph);
+            var paragraph = ParseParagraph(p);
+            paragraphs.Add(paragraph);
         }
 
         ParagraphsItemsControl.ItemsSource = null;
-        ParagraphsItemsControl.ItemsSource = _paragraphs;
+        ParagraphsItemsControl.ItemsSource = paragraphs;
     }
+    
+    private ParagraphItem ParseParagraph(XElement pElement)
+    {
+        var paragraph = new ParagraphItem();
+        var currentLine = new LineItem();
 
-    private void ParseNodesIntoTokens(IEnumerable<XNode> nodes, List<TokenItem> tokens, string? entityType = null)
+        paragraph.Lines.Add(currentLine);
+
+        ParseNodesIntoLines(pElement.Nodes(), paragraph, ref currentLine);
+
+        return paragraph;
+    }
+    
+    private void ParseNodesIntoLines(IEnumerable<XNode> nodes, ParagraphItem paragraph, ref LineItem currentLine, string? entityType = null)
     {
         foreach (var node in nodes)
         {
             if (node is XText textNode)
             {
-                AddTextAsTokens(textNode.Value, tokens, entityType);
+                AddTextToLines(textNode.Value, paragraph, ref currentLine, entityType);
             }
             else if (node is XElement element)
             {
                 if (element.Name.LocalName == "ne")
                 {
                     var type = (string?)element.Attribute("type");
-                    ParseNodesIntoTokens(element.Nodes(), tokens, type);
+                    ParseNodesIntoLines(element.Nodes(), paragraph, ref currentLine, type);
                 }
                 else
                 {
-                    ParseNodesIntoTokens(element.Nodes(), tokens, entityType);
+                    ParseNodesIntoLines(element.Nodes(), paragraph, ref currentLine, entityType);
                 }
             }
         }
     }
+    
+    private void AddTextToLines(string text, ParagraphItem paragraph, ref LineItem currentLine, string? entityType)
+    {
+        var parts = text.Split('\n');
 
+        for (int i = 0; i < parts.Length; i++)
+        {
+            AddTextAsTokens(parts[i], currentLine.Tokens, entityType);
+
+            if (i < parts.Length - 1)
+            {
+                currentLine = new LineItem();
+                paragraph.Lines.Add(currentLine);
+            }
+        }
+    }
+    
     private void AddTextAsTokens(string text, List<TokenItem> tokens, string? entityType)
     {
-        var parts = Regex.Matches(text, @"\S+|\s+");
+        var parts = System.Text.RegularExpressions.Regex.Matches(text, @"\S+|\s+");
 
-        foreach (Match part in parts)
+        foreach (System.Text.RegularExpressions.Match part in parts)
         {
+            if (part.Value.Length == 0)
+                continue;
+
             tokens.Add(new TokenItem
             {
                 Text = part.Value,
@@ -79,6 +110,7 @@ public partial class MainWindow : Window
             });
         }
     }
+
 
     private async Task<string?> OpenFile()
     {
