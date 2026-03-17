@@ -42,7 +42,9 @@
 
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="local:TokenItem">
-                                                <TextBlock Text="{Binding Text}" />
+                                                <Border Background="{Binding Background}" Padding="2,0,2,0">
+                                                    <TextBlock Text="{Binding Text}" />
+                                                </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>

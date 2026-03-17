@@ -29,7 +29,7 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        XDocument doc = XDocument.Parse(text);
+        var doc = XDocument.Parse(text);
 
         var paragraphs = new List<ParagraphItem>();
 
@@ -82,7 +82,7 @@ public partial class MainWindow : Window
     {
         var parts = text.Split('\n');
 
-        for (int i = 0; i < parts.Length; i++)
+        for (var i = 0; i < parts.Length; i++)
         {
             AddTextAsTokens(parts[i], currentLine.Tokens, entityType);
 
@@ -96,13 +96,16 @@ public partial class MainWindow : Window
     
     private void AddTextAsTokens(string text, List<TokenItem> tokens, string? entityType)
     {
-        var parts = System.Text.RegularExpressions.Regex.Matches(text, @"\S+|\s+");
+        var parts = Regex.Matches(text, @"\S+|\s+");
 
-        foreach (System.Text.RegularExpressions.Match part in parts)
+        foreach (Match part in parts)
         {
             if (part.Value.Length == 0)
                 continue;
-
+            
+            if (part.Value == " ")
+                continue;
+            
             tokens.Add(new TokenItem
             {
                 Text = part.Value,
@@ -110,11 +113,25 @@ public partial class MainWindow : Window
             });
         }
     }
-
+    // private void AddTextAsTokens(string text, List<TokenItem> tokens, string? entityType)
+    // {
+    //     var parts = text.Split();
+    //
+    //     foreach (var part in parts)
+    //     {
+    //         if (part.Length == 0)
+    //             continue;
+    //
+    //         tokens.Add(new TokenItem
+    //         {
+    //             Text = part,
+    //         });
+    //     }
+    // }
 
     private async Task<string?> OpenFile()
     {
-        var topLevel = TopLevel.GetTopLevel(this);
+        var topLevel = GetTopLevel(this);
         if (topLevel is null)
             return null;
 
