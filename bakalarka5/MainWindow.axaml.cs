@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using bakalarka5.Core.Models;
@@ -14,14 +16,14 @@ namespace bakalarka5;
 
 public partial class MainWindow : Window
 {
-    private List<ParagraphItem> _paragraphs = new();
 
     public MainWindow()
     {
         InitializeComponent();
 
     }
-
+        
+    //TODO refactor
     private async void FileOpenMenuItem(object? sender, RoutedEventArgs e)
     {
         var text = await OpenFile();
@@ -157,5 +159,16 @@ public partial class MainWindow : Window
         using var reader = new StreamReader(stream);
         var text = await reader.ReadToEndAsync();
         return text;
+    }
+
+    private void Token_PointerPressed(object? sender, PointerPressedEventArgs e)
+    {
+        if (sender is not Border border)
+            return;
+
+        if (border.DataContext is not TokenItem token)
+            return;
+
+        token.IsSelected = !token.IsSelected;
     }
 }

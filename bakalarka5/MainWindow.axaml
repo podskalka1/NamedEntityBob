@@ -42,7 +42,11 @@
 
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="local:TokenItem">
-                                                <Border Background="{Binding Background}" Padding="2,0,2,0">
+                                                <Border Background="{Binding Background}"
+                                                        BorderBrush="{Binding BorderBrush}"
+                                                        BorderThickness="{Binding BorderThickness}"
+                                                        Padding="2,0,2,0"
+                                                        PointerPressed="Token_PointerPressed">
                                                     <TextBlock Text="{Binding Text}" />
                                                 </Border>
                                             </DataTemplate>
