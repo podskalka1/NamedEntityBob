@@ -13,15 +13,15 @@ public class TokenItem : INotifyPropertyChanged
     
     public string Text { get; set; } = "";
 
-    private string? _tag;
     public string? Tag
     {
-        get => _tag;
+        get;
         set
         {
-            if (_tag == value) return;
-            _tag = value;
+            if (field == value) return;
+            field = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(Background));
         }
     }
 
@@ -69,14 +69,22 @@ public class TokenItem : INotifyPropertyChanged
         var colorDefiningCharacter = char.ToLower(Tag[0]);
         return colorDefiningCharacter switch
         {
-            'a' => Colors.Yellow,
-            'g' => Colors.Lime,
-            'i' => Colors.Orange,
-            'm' => Colors.Aqua,
-            'n' => Colors.IndianRed,
-            'o' => Colors.HotPink,
-            'p' => Colors.CadetBlue,
-            't' => Colors.Gray,
+            'a' => Colors.DarkGoldenrod,
+            'g' => Colors.DarkGreen,
+            'i' => Colors.Brown,
+            'm' => Colors.DarkBlue,
+            'n' => Colors.DarkRed,
+            'o' => Colors.DarkOrchid,
+            'p' => Colors.DarkCyan,
+            't' => Colors.DarkSlateGray,
+            // 'a' => Colors.Yellow,
+            // 'g' => Colors.Lime,
+            // 'i' => Colors.Orange,
+            // 'm' => Colors.Aqua,
+            // 'n' => Colors.IndianRed,
+            // 'o' => Colors.HotPink,
+            // 'p' => Colors.CadetBlue,
+            // 't' => Colors.Gray,
             _ => Colors.Transparent
         };
     }

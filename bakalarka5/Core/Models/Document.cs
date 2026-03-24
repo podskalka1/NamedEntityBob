@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -12,10 +13,10 @@ namespace bakalarka5;
 
 public class Document
 {
-    private static MainWindow _mainWindow;
-    public List<ParagraphItem> Paragraphs { get; private set; }
+    private static MainWindow _mainWindow = null!;
+    public ObservableCollection<ParagraphItem> Paragraphs { get; private set; }
 
-    private Document(List<ParagraphItem> paragraphs)
+    private Document(ObservableCollection<ParagraphItem> paragraphs)
     {
         Paragraphs = paragraphs;
     }
@@ -31,7 +32,7 @@ public class Document
 
         var xdoc = XDocument.Parse(text);
 
-        var paragraphs = new List<ParagraphItem>();
+        var paragraphs = new ObservableCollection<ParagraphItem>();
 
         foreach (var p in xdoc.Descendants("p"))
         {
