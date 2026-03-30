@@ -42,13 +42,12 @@ public partial class MainWindow : Window
         
         token.IsSelected = !token.IsSelected;
 
-        if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed == true)
-        {
-            var menu = BuildTokenContextMenu(token);
-            border.ContextMenu = menu;
-            menu.Open(border);
-            token.IsSelected = !token.IsSelected;
-        }
+        if (!e.GetCurrentPoint(this).Properties.IsRightButtonPressed) 
+            return;
+        var menu = BuildTokenContextMenu(token);
+        border.ContextMenu = menu;
+        menu.Open(border);
+        token.IsSelected = false;
     }
     private ContextMenu BuildTokenContextMenu(TokenView tokenView)
     {
@@ -63,7 +62,7 @@ public partial class MainWindow : Window
 
             item.Click += (_, _) =>
             {
-                tokenView.Model.Tag = tag;
+                tokenView.Tag = tag;
             };
 
             items.Add(item);
@@ -78,7 +77,7 @@ public partial class MainWindow : Window
 
         clearItem.Click += (_, _) =>
         {
-            tokenView.Model.Tag = null;
+            tokenView.Tag = null;
         };
 
         items.Add(clearItem);

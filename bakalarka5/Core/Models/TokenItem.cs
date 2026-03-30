@@ -1,16 +1,12 @@
-using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Avalonia;
-using Avalonia.Media;
 
 namespace bakalarka5.Core.Models;
 public class TokenItem : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public string Text { get; set; } = "";
+    public string Text { get; init; } = "";
 
     private string? _tag;
     public string? Tag

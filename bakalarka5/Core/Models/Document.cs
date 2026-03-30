@@ -30,11 +30,11 @@ public class Document
         if (string.IsNullOrWhiteSpace(text))
             return null;
 
-        var xdoc = XDocument.Parse(text);
+        var xDocument = XDocument.Parse(text);
 
         var paragraphs = new ObservableCollection<ParagraphItem>();
 
-        foreach (var p in xdoc.Descendants("p"))
+        foreach (var p in xDocument.Descendants("p"))
         {
             paragraphs.Add(ParseParagraph(p));
         }

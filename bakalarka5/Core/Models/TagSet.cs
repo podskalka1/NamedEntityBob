@@ -1,11 +1,10 @@
 using System.Collections.Generic;
-using System.Runtime.InteropServices.JavaScript;
 
 namespace bakalarka5.Core.Models;
 
-public class TagSet
+public static class TagSet
 {
-    public static List<string> TagSetNe =
+    public static readonly List<string> TagSetNe =
     [
         "ah",
         "at",
