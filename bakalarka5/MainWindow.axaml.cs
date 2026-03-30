@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using bakalarka5.Core.Models;
+using bakalarka5.Core.Views;
 
 namespace bakalarka5;
 
@@ -15,6 +16,7 @@ public partial class MainWindow : Window
     }
     
     private Document _document;
+    private DocumentView? _documentView;
 
     private Document Document
     {
@@ -26,7 +28,8 @@ public partial class MainWindow : Window
     {
         Document = await Document.OpenDocument(this);
 
-        ParagraphsItemsControl.ItemsSource = Document.Paragraphs;
+        _documentView = new DocumentView(Document);
+        ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
 
     private void Token_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -34,7 +37,7 @@ public partial class MainWindow : Window
         if (sender is not Border border)
             return;
 
-        if (border.DataContext is not TokenItem token)
+        if (border.DataContext is not TokenView token)
             return;
         
         token.IsSelected = !token.IsSelected;
@@ -47,7 +50,7 @@ public partial class MainWindow : Window
             token.IsSelected = !token.IsSelected;
         }
     }
-    private ContextMenu BuildTokenContextMenu(TokenItem token)
+    private ContextMenu BuildTokenContextMenu(TokenView tokenView)
     {
         var items = new List<MenuItem>();
 
@@ -60,7 +63,7 @@ public partial class MainWindow : Window
 
             item.Click += (_, _) =>
             {
-                token.Tag = tag;
+                tokenView.Model.Tag = tag;
             };
 
             items.Add(item);
@@ -75,7 +78,7 @@ public partial class MainWindow : Window
 
         clearItem.Click += (_, _) =>
         {
-            token.Tag = null;
+            tokenView.Model.Tag = null;
         };
 
         items.Add(clearItem);

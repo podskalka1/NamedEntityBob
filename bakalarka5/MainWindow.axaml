@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:bakalarka5.Core.Models"
+        xmlns:view="clr-namespace:bakalarka5.Core.Views"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -21,7 +21,7 @@
                       HorizontalScrollBarVisibility="Auto">
             <ItemsControl x:Name="ParagraphsItemsControl">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="local:ParagraphItem">
+                    <DataTemplate x:DataType="view:ParagraphView">
                         <ItemsControl ItemsSource="{Binding Lines}"
                                       Margin="0,0,0,12"
                                       Width="{Binding #DocumentScroll.Bounds.Width}">
@@ -32,7 +32,7 @@
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="local:LineItem">
+                                <DataTemplate x:DataType="view:LineView">
                                     <ItemsControl ItemsSource="{Binding Tokens}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -41,7 +41,7 @@
                                         </ItemsControl.ItemsPanel>
 
                                         <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="local:TokenItem">
+                                            <DataTemplate x:DataType="view:TokenView">
                                                 <Border Background="{Binding Background}"
                                                         BorderBrush="{Binding BorderBrush}"
                                                         BorderThickness="{Binding BorderThickness}"
