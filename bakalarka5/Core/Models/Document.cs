@@ -13,23 +13,35 @@ namespace bakalarka5;
 
 public class Document
 {
-    private static MainWindow _mainWindow = null!;
+    public string? FilePath { get; private set; }
+
     public ObservableCollection<ParagraphItem> Paragraphs { get; private set; }
 
-    private Document(ObservableCollection<ParagraphItem> paragraphs)
+    private Document(ObservableCollection<ParagraphItem> paragraphs, string? filePath = null)
     {
         Paragraphs = paragraphs;
+        FilePath = filePath;
     }
 
-    public static async Task<Document> OpenDocument(MainWindow mainWindow)
+    public static async Task<Document?> OpenDocument(MainWindow mainWindow)
     {
-        _mainWindow = mainWindow;
-        
-        var text = await OpenFile();
+        var fileResult = await OpenFile(mainWindow);
 
-        if (string.IsNullOrWhiteSpace(text))
+        if (fileResult is null)
             return null;
 
+        var (path, text) = fileResult.Value;
+        return Parse(text, path);
+    }
+
+    public static async Task<Document> OpenDocument(string path)
+    {
+        var text = await File.ReadAllTextAsync(path);
+        return Parse(text, path);
+    }
+
+    private static Document Parse(string text, string? filePath = null)
+    {
         var xDocument = XDocument.Parse(text);
 
         var paragraphs = new ObservableCollection<ParagraphItem>();
@@ -39,12 +51,12 @@ public class Document
             paragraphs.Add(ParseParagraph(p));
         }
 
-        return new Document(paragraphs);
+        return new Document(paragraphs, filePath);
     }
-    
-    private static async Task<string?> OpenFile()
+
+    private static async Task<(string path, string text)?> OpenFile(MainWindow mainWindow)
     {
-        var topLevel = TopLevel.GetTopLevel(_mainWindow);
+        var topLevel = TopLevel.GetTopLevel(mainWindow);
         if (topLevel is null)
             return null;
 
@@ -69,7 +81,8 @@ public class Document
         await using var stream = await file.OpenReadAsync();
         using var reader = new StreamReader(stream);
         var text = await reader.ReadToEndAsync();
-        return text;
+
+        return (file.Path.LocalPath, text);
     }
 
     private static ParagraphItem ParseParagraph(XElement pElement)
@@ -131,10 +144,10 @@ public class Document
         {
             if (part.Value.Length == 0)
                 continue;
-            
+
             if (part.Value == " ")
                 continue;
-            
+
             tokens.Add(new TokenItem
             {
                 Text = part.Value,
@@ -142,6 +155,4 @@ public class Document
             });
         }
     }
-
-    
 }

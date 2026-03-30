@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -13,6 +14,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        OpenLastDocument();
     }
     
     private Document _document;
@@ -27,7 +29,10 @@ public partial class MainWindow : Window
     private async void FileOpenMenuItem(object? sender, RoutedEventArgs e)
     {
         Document = await Document.OpenDocument(this);
-
+        
+        if (Document.FilePath is not null)
+            AppState.SaveLastFile(Document.FilePath);
+        
         _documentView = new DocumentView(Document);
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
@@ -41,13 +46,13 @@ public partial class MainWindow : Window
             return;
         
         token.IsSelected = !token.IsSelected;
-
-        if (!e.GetCurrentPoint(this).Properties.IsRightButtonPressed) 
-            return;
-        var menu = BuildTokenContextMenu(token);
-        border.ContextMenu = menu;
-        menu.Open(border);
-        token.IsSelected = false;
+        
+        if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
+        {
+            var menu = BuildTokenContextMenu(token);
+            border.ContextMenu = menu;
+            menu.Open(border);
+        }
     }
     private ContextMenu BuildTokenContextMenu(TokenView tokenView)
     {
@@ -63,6 +68,7 @@ public partial class MainWindow : Window
             item.Click += (_, _) =>
             {
                 tokenView.Tag = tag;
+                tokenView.IsSelected = false;
             };
 
             items.Add(item);
@@ -78,6 +84,7 @@ public partial class MainWindow : Window
         clearItem.Click += (_, _) =>
         {
             tokenView.Tag = null;
+            tokenView.IsSelected = false;
         };
 
         items.Add(clearItem);
@@ -88,4 +95,16 @@ public partial class MainWindow : Window
         };
     }
     
+    private async void OpenLastDocument()
+    {
+        var path = AppState.LoadLastFile();
+
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+            return;
+
+        Document = await Document.OpenDocument(path);
+
+        _documentView = new DocumentView(Document);
+        ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
+    }
 }
