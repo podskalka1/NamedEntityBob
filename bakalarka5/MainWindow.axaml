@@ -47,7 +47,14 @@
                                                         BorderThickness="{Binding BorderThickness}"
                                                         Padding="2,0,2,0"
                                                         PointerPressed="Token_PointerPressed">
-                                                    <TextBlock Text="{Binding Text}" />
+                                                    <TextBlock>
+                                                        <TextBlock.Inlines>
+                                                            <Run Text="{Binding Tag, Converter={StaticResource TagDisplayConverter}}"
+                                                                 BaselineAlignment="Superscript"
+                                                                 FontSize="10"/>
+                                                            <Run Text="{Binding Text}" />
+                                                        </TextBlock.Inlines>
+                                                    </TextBlock>
                                                 </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
