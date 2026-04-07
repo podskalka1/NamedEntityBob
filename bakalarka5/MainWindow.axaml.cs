@@ -11,7 +11,8 @@ namespace bakalarka5;
 
 public partial class MainWindow : Window
 {
-
+    private TokenView? _contextToken;
+    
     public MainWindow()
     {
         InitializeComponent();
@@ -50,50 +51,8 @@ public partial class MainWindow : Window
         
         if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
         {
-            var menu = BuildTokenContextMenu(token);
-            border.ContextMenu = menu;
-            menu.Open(border);
+            NeContextMenu.OpenMenu(border, token);
         }
-    }
-    private ContextMenu BuildTokenContextMenu(TokenView tokenView)
-    {
-        var items = new List<MenuItem>();
-
-        foreach (var tag in TagSet.TagSetNe)
-        {
-            var item = new MenuItem
-            {
-                Header = tag
-            };
-
-            item.Click += (_, _) =>
-            {
-                tokenView.Tag = tag;
-                tokenView.IsSelected = false;
-            };
-
-            items.Add(item);
-        }
-
-        items.Add(new MenuItem { Header = "-" });
-
-        var clearItem = new MenuItem
-        {
-            Header = "Clear tag"
-        };
-
-        clearItem.Click += (_, _) =>
-        {
-            tokenView.Tag = null;
-            tokenView.IsSelected = false;
-        };
-
-        items.Add(clearItem);
-
-        return new ContextMenu
-        {
-            ItemsSource = items
-        };
     }
     
     private async void OpenLastDocument()
