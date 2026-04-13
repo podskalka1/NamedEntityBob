@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace bakalarka5.Core.Models;
 
-public static class TagSet
+public static class TypeSet
 {
     public static readonly NeType NumbersType = new NeType("A", "[A] Čísla v Adresách");
     public static readonly List<NeType> Numbers =

@@ -8,14 +8,14 @@ public class TokenItem : INotifyPropertyChanged
 
     public string Text { get; init; } = "";
 
-    private string? _tag;
-    public string? Tag
+    private string? _type;
+    public string? Type
     {
-        get => _tag;
+        get => _type;
         set
         {
-            if (_tag == value) return;
-            _tag = value;
+            if (_type == value) return;
+            _type = value;
             OnPropertyChanged();
         }
     }

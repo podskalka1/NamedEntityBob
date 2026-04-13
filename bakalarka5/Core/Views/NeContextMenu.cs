@@ -60,18 +60,18 @@ public static class NeContextMenu
         
         //TODO at the top of this Menu will come a MenuItem which will work as a gateway into that Entity Linking Thingamajig 
         
-        items.Add(BuildSubMenu(TagSet.NumbersType,TagSet.Numbers));
-        items.Add(BuildSubMenu(TagSet.PlacesType,TagSet.Places));
-        items.Add(BuildSubMenu(TagSet.InstitutionType,TagSet.Institutions));
-        items.Add(BuildSubMenu(TagSet.MediaType,TagSet.Media));
-        items.Add(BuildSubMenu(TagSet.NumberExpressionsType,TagSet.NumberExpressions));
-        items.Add(BuildSubMenu(TagSet.ArtifactType,TagSet.Artifacts));
-        items.Add(BuildSubMenu(TagSet.PersonsType,TagSet.Persons));
-        items.Add(BuildSubMenu(TagSet.TimeType,TagSet.Time));
+        items.Add(BuildSubMenu(TypeSet.NumbersType,TypeSet.Numbers));
+        items.Add(BuildSubMenu(TypeSet.PlacesType,TypeSet.Places));
+        items.Add(BuildSubMenu(TypeSet.InstitutionType,TypeSet.Institutions));
+        items.Add(BuildSubMenu(TypeSet.MediaType,TypeSet.Media));
+        items.Add(BuildSubMenu(TypeSet.NumberExpressionsType,TypeSet.NumberExpressions));
+        items.Add(BuildSubMenu(TypeSet.ArtifactType,TypeSet.Artifacts));
+        items.Add(BuildSubMenu(TypeSet.PersonsType,TypeSet.Persons));
+        items.Add(BuildSubMenu(TypeSet.TimeType,TypeSet.Time));
 
         items.Add(new MenuItem { Header = "-" });
 
-        items.Add(BuildMenuItem(TagSet.NoneType));
+        items.Add(BuildMenuItem(TypeSet.NoneType));
         
         return new ContextMenu
         {

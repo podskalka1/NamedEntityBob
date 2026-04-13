@@ -151,7 +151,7 @@ public class Document
             tokens.Add(new TokenItem
             {
                 Text = part.Value,
-                Tag = string.IsNullOrWhiteSpace(part.Value) ? null : entityType
+                Type = string.IsNullOrWhiteSpace(part.Value) ? null : entityType
             });
         }
     }

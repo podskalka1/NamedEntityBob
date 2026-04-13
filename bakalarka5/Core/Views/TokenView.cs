@@ -16,11 +16,11 @@ public class TokenView : INotifyPropertyChanged
 
     public string? Tag
     {
-        get => Model.Tag;
+        get => Model.Type;
         set
         {
-            if (Model.Tag == value) return;
-            Model.Tag = value;
+            if (Model.Type == value) return;
+            Model.Type = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(Background));
         }
@@ -52,7 +52,7 @@ public class TokenView : INotifyPropertyChanged
 
     private void ModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(TokenItem.Tag))
+        if (e.PropertyName == nameof(TokenItem.Type))
         {
             OnPropertyChanged(nameof(Tag));
             OnPropertyChanged(nameof(Background));
