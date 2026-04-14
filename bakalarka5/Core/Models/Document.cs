@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
-using bakalarka5.Core.Models;
 
-namespace bakalarka5;
+namespace bakalarka5.Core.Models;
 
 public class Document
 {
@@ -92,51 +91,63 @@ public class Document
 
         paragraph.Lines.Add(currentLine);
 
-        ParseNodesIntoLines(pElement.Nodes(), paragraph, ref currentLine);
+        ParseNodesIntoLines(pElement.Nodes(), paragraph, ref currentLine, currentLine);
 
         return paragraph;
     }
 
-    private static void ParseNodesIntoLines(IEnumerable<XNode> nodes, ParagraphItem paragraph, ref LineItem currentLine, string? entityType = null)
+    private static void ParseNodesIntoLines(
+        IEnumerable<XNode> nodes,
+        ParagraphItem paragraph,
+        ref LineItem currentLine,
+        InlineContainerNode currentContainer)
     {
         foreach (var node in nodes)
         {
             if (node is XText textNode)
             {
-                AddTextToLines(textNode.Value, paragraph, ref currentLine, entityType);
+                AddTextToLines(textNode.Value, paragraph, ref currentLine, ref currentContainer);
             }
             else if (node is XElement element)
             {
                 if (element.Name.LocalName == "ne")
                 {
                     var type = (string?)element.Attribute("type");
-                    ParseNodesIntoLines(element.Nodes(), paragraph, ref currentLine, type);
+                    var typeItem = new TypeItem(type);
+                    currentContainer.AddChild(typeItem);
+
+                    ParseNodesIntoLines(element.Nodes(), paragraph, ref currentLine, typeItem);
                 }
                 else
                 {
-                    ParseNodesIntoLines(element.Nodes(), paragraph, ref currentLine, entityType);
+                    ParseNodesIntoLines(element.Nodes(), paragraph, ref currentLine, currentContainer);
                 }
             }
         }
     }
 
-    private static void AddTextToLines(string text, ParagraphItem paragraph, ref LineItem currentLine, string? entityType)
+    private static void AddTextToLines(
+        string text,
+        ParagraphItem paragraph,
+        ref LineItem currentLine,
+        ref InlineContainerNode currentContainer)
     {
         var parts = text.Split('\n');
 
         for (var i = 0; i < parts.Length; i++)
         {
-            AddTextAsTokens(parts[i], currentLine.Tokens, entityType);
+            AddTextAsTokens(parts[i], currentContainer);
 
             if (i < parts.Length - 1)
             {
                 currentLine = new LineItem();
                 paragraph.Lines.Add(currentLine);
+                currentContainer = currentLine;
             }
         }
     }
 
-    private static void AddTextAsTokens(string text, List<TokenItem> tokens, string? entityType)
+    private static void AddTextAsTokens(string text, InlineContainerNode container)
     {
         var parts = Regex.Matches(text, @"\S+|\s+");
 
@@ -148,10 +159,9 @@ public class Document
             if (part.Value == " ")
                 continue;
 
-            tokens.Add(new TokenItem
+            container.AddChild(new TokenItem
             {
-                Text = part.Value,
-                Type = string.IsNullOrWhiteSpace(part.Value) ? null : entityType
+                Text = part.Value
             });
         }
     }

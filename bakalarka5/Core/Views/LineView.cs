@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using bakalarka5.Core.Models;
 
@@ -8,11 +8,13 @@ public class LineView
 {
     public LineItem Model { get; }
 
-    public List<TokenView> Tokens { get; }
+    public ObservableCollection<InlineNodeView> Nodes { get; }
 
     public LineView(LineItem model)
     {
         Model = model;
-        Tokens = model.Tokens.Select(t => new TokenView(t)).ToList();
+        Nodes = new ObservableCollection<InlineNodeView>(
+            model.Children.Select(ViewFactory.Create)
+        );
     }
 }

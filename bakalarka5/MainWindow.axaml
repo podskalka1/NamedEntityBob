@@ -9,6 +9,40 @@
         x:Class="bakalarka5.MainWindow"
         Title="bakalarka5">
 
+    <Window.DataTemplates>
+        <DataTemplate x:DataType="view:TokenView">
+            <Border BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="{Binding BorderThickness}"
+                    Padding="2,0,2,0"
+                    PointerPressed="InlineNode_PointerPressed">
+                <TextBlock Text="{Binding Text}" />
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="view:TypeView">
+            <Border Background="{Binding Background}"
+                    BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="{Binding BorderThickness}"
+                    Padding="2,0,2,0"
+                    PointerPressed="InlineNode_PointerPressed">
+                <TextBlock>
+                    <TextBlock.Inlines>
+                        <Run Text="{Binding Tag, Converter={StaticResource TagDisplayConverter}}"
+                             BaselineAlignment="Superscript"
+                             FontSize="10"/>
+                    </TextBlock.Inlines>
+                    <ItemsControl ItemsSource="{Binding Children}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </TextBlock>
+            </Border>
+        </DataTemplate>
+    </Window.DataTemplates>
+
     <DockPanel>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_File">
@@ -33,31 +67,12 @@
 
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate x:DataType="view:LineView">
-                                    <ItemsControl ItemsSource="{Binding Tokens}">
+                                    <ItemsControl ItemsSource="{Binding Nodes}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
                                                 <WrapPanel />
                                             </ItemsPanelTemplate>
                                         </ItemsControl.ItemsPanel>
-
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="view:TokenView">
-                                                <Border Background="{Binding Background}"
-                                                        BorderBrush="{Binding BorderBrush}"
-                                                        BorderThickness="{Binding BorderThickness}"
-                                                        Padding="2,0,2,0"
-                                                        PointerPressed="Token_PointerPressed">
-                                                    <TextBlock>
-                                                        <TextBlock.Inlines>
-                                                            <Run Text="{Binding Tag, Converter={StaticResource TagDisplayConverter}}"
-                                                                 BaselineAlignment="Superscript"
-                                                                 FontSize="10"/>
-                                                            <Run Text="{Binding Text}" />
-                                                        </TextBlock.Inlines>
-                                                    </TextBlock>
-                                                </Border>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
                                     </ItemsControl>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>

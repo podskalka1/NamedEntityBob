@@ -7,15 +7,9 @@ namespace bakalarka5.Core.Views;
 
 public static class NeContextMenu
 {
-    private static TokenView? _contextToken;
-    private static ContextMenu? _contextMenu;
+    public static Action<InlineNodeView, string?>? ApplyTypeAction { get; set; }
 
-    static NeContextMenu()
-    {
-        _contextMenu = BuildTokenContextMenu();
-    }
-
-    private static ContextMenu BuildTokenContextMenu()
+    private static ContextMenu BuildContextMenu(InlineNodeView node)
     {
         MenuItem BuildMenuItem(NeType type)
         {
@@ -26,64 +20,61 @@ public static class NeContextMenu
 
             item.Click += (_, _) =>
             {
-                _contextToken.Tag = type.Type;
-                _contextToken.IsSelected = false;
-                _contextToken = null;
+                ApplyTypeAction?.Invoke(node, type.Type);
+                node.IsSelected = false;
             };
+
             return item;
         }
 
         MenuItem BuildSubMenu(NeType type, List<NeType> types)
-        { 
+        {
             var subMenu = new MenuItem
             {
                 Header = type.Description
             };
 
-            var items = new List<MenuItem>();
-            
-            items.Add(BuildMenuItem(type));
-            items.Add(new MenuItem { Header = "-" });
-            
+            var items = new List<MenuItem>
+            {
+                BuildMenuItem(type),
+                new MenuItem { Header = "-" }
+            };
+
             foreach (var nestedType in types)
             {
-                var nestedItem = BuildMenuItem(nestedType);
-
-                items.Add(nestedItem);
+                items.Add(BuildMenuItem(nestedType));
             }
+
             subMenu.ItemsSource = items;
-            
             return subMenu;
         }
-        
-        var items = new List<MenuItem>();
-        
-        //TODO at the top of this Menu will come a MenuItem which will work as a gateway into that Entity Linking Thingamajig 
-        
-        items.Add(BuildSubMenu(TypeSet.NumbersType,TypeSet.Numbers));
-        items.Add(BuildSubMenu(TypeSet.PlacesType,TypeSet.Places));
-        items.Add(BuildSubMenu(TypeSet.InstitutionType,TypeSet.Institutions));
-        items.Add(BuildSubMenu(TypeSet.MediaType,TypeSet.Media));
-        items.Add(BuildSubMenu(TypeSet.NumberExpressionsType,TypeSet.NumberExpressions));
-        items.Add(BuildSubMenu(TypeSet.ArtifactType,TypeSet.Artifacts));
-        items.Add(BuildSubMenu(TypeSet.PersonsType,TypeSet.Persons));
-        items.Add(BuildSubMenu(TypeSet.TimeType,TypeSet.Time));
 
-        items.Add(new MenuItem { Header = "-" });
+        var items = new List<MenuItem>
+        {
+            BuildSubMenu(TypeSet.NumbersType, TypeSet.Numbers),
+            BuildSubMenu(TypeSet.PlacesType, TypeSet.Places),
+            BuildSubMenu(TypeSet.InstitutionType, TypeSet.Institutions),
+            BuildSubMenu(TypeSet.MediaType, TypeSet.Media),
+            BuildSubMenu(TypeSet.NumberExpressionsType, TypeSet.NumberExpressions),
+            BuildSubMenu(TypeSet.ArtifactType, TypeSet.Artifacts),
+            BuildSubMenu(TypeSet.PersonsType, TypeSet.Persons),
+            BuildSubMenu(TypeSet.TimeType, TypeSet.Time),
+            new MenuItem { Header = "-" },
+            BuildMenuItem(TypeSet.NoneType)
+        };
 
-        items.Add(BuildMenuItem(TypeSet.NoneType));
-        
         return new ContextMenu
         {
             ItemsSource = items
         };
     }
 
-    public static void OpenMenu(Border border, TokenView token)
+    public static void OpenMenu(Border border, InlineNodeView node)
     {
-        var menu = BuildTokenContextMenu();
-        _contextToken = token;
-        border.ContextMenu =  menu;
+        node.IsSelected = true;
+
+        var menu = BuildContextMenu(node);
+        border.ContextMenu = menu;
         menu.Open(border);
     }
 }
