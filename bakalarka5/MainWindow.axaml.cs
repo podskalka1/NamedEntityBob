@@ -14,10 +14,12 @@ public partial class MainWindow : Window
     private DocumentView? _documentView;
     
     private readonly SelectionManager _selectionManager = new();
+    private readonly SelectionController _selectionController;
 
     public MainWindow()
     {
         InitializeComponent();
+        _selectionController = new SelectionController(_selectionManager);
         OpenLastDocument();
     }
 
@@ -51,14 +53,7 @@ public partial class MainWindow : Window
         if (border.DataContext is not InlineNodeView node)
             return;
 
-        _selectionManager.SelectSingle(node.Model);
-
-        if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
-        {
-            NeContextMenu.OpenMenu(border, node);
-        }
-
-        e.Handled = true;
+        _selectionController.HandlePointerPressed(border, node, e);
     }
 
     private async void OpenLastDocument()

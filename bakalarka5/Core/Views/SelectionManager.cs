@@ -59,6 +59,11 @@ public class SelectionManager : INotifyPropertyChanged
         }
 
         var commonParent = FindLowestCommonContainer(AnchorNode, node);
+        if (commonParent is null)
+        {
+            Clear();
+            return;
+        }
 
         var startNode = GetDirectChildUnderAncestor(AnchorNode, commonParent);
         var endNode = GetDirectChildUnderAncestor(node, commonParent);
@@ -84,7 +89,7 @@ public class SelectionManager : INotifyPropertyChanged
         return current;
     }
 
-    private static InlineContainerNode FindLowestCommonContainer(InlineNode a, InlineNode b)
+    private static InlineContainerNode? FindLowestCommonContainer(InlineNode a, InlineNode b)
     {
         var ancestors = new HashSet<InlineContainerNode>();
 
@@ -104,7 +109,7 @@ public class SelectionManager : INotifyPropertyChanged
             currentB = currentB.Parent;
         }
 
-        throw new InvalidOperationException("Nodes do not share a common container.");
+        return null;
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
