@@ -12,6 +12,8 @@ public partial class MainWindow : Window
 {
     private Document? _document;
     private DocumentView? _documentView;
+    
+    private readonly SelectionManager _selectionManager = new();
 
     public MainWindow()
     {
@@ -37,7 +39,7 @@ public partial class MainWindow : Window
         if (Document.FilePath is not null)
             AppState.SaveLastFile(Document.FilePath);
 
-        _documentView = new DocumentView(Document);
+        _documentView = new DocumentView(Document, _selectionManager);
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
 
@@ -49,12 +51,14 @@ public partial class MainWindow : Window
         if (border.DataContext is not InlineNodeView node)
             return;
 
-        node.IsSelected = !node.IsSelected;
+        _selectionManager.SelectSingle(node.Model);
 
         if (e.GetCurrentPoint(this).Properties.IsRightButtonPressed)
         {
             NeContextMenu.OpenMenu(border, node);
         }
+
+        e.Handled = true;
     }
 
     private async void OpenLastDocument()
@@ -66,7 +70,7 @@ public partial class MainWindow : Window
 
         Document = await Document.OpenDocument(path);
 
-        _documentView = new DocumentView(Document);
+        _documentView = new DocumentView(Document,_selectionManager);
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
 }

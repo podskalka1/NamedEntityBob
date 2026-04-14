@@ -21,7 +21,7 @@ public static class NeContextMenu
             item.Click += (_, _) =>
             {
                 ApplyTypeAction?.Invoke(node, type.Type);
-                node.IsSelected = false;
+                //node.IsSelected = false;
             };
 
             return item;
@@ -71,7 +71,7 @@ public static class NeContextMenu
 
     public static void OpenMenu(Border border, InlineNodeView node)
     {
-        node.IsSelected = true;
+        //node.IsSelected = true;
 
         var menu = BuildContextMenu(node);
         border.ContextMenu = menu;

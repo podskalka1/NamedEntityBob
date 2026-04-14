@@ -7,14 +7,16 @@ namespace bakalarka5.Core.Views;
 public class LineView
 {
     public LineItem Model { get; }
+    public SelectionManager SelectionManager { get; }
 
     public ObservableCollection<InlineNodeView> Nodes { get; }
 
-    public LineView(LineItem model)
+    public LineView(LineItem model, SelectionManager selectionManager)
     {
         Model = model;
+        SelectionManager = selectionManager;
         Nodes = new ObservableCollection<InlineNodeView>(
-            model.Children.Select(ViewFactory.Create)
+            model.Children.Select(child => ViewFactory.Create(child, selectionManager))
         );
     }
 }

@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using bakalarka5.Core.Models;
 
 namespace bakalarka5.Core.Views;
@@ -9,7 +8,8 @@ public class TokenView : InlineNodeView
 
     public string Text => TokenModel.Text;
 
-    public TokenView(TokenItem model) : base(model)
+    public TokenView(TokenItem model, SelectionManager selectionManager)
+        : base(model, selectionManager)
     {
     }
 }

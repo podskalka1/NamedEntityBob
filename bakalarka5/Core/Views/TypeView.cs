@@ -1,9 +1,6 @@
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using Avalonia;
 using Avalonia.Media;
 using bakalarka5.Core.Models;
 
@@ -27,30 +24,15 @@ public class TypeView : InlineNodeView
 
     public ObservableCollection<InlineNodeView> Children { get; }
 
-    private bool _isSelected;
-    public bool IsSelected
-    {
-        get => _isSelected;
-        set
-        {
-            if (_isSelected == value) return;
-            _isSelected = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(BorderBrush));
-            OnPropertyChanged(nameof(BorderThickness));
-        }
-    }
-
     public IBrush Background => new SolidColorBrush(DetermineColor());
-    public IBrush BorderBrush => IsSelected ? Brushes.White : Brushes.Transparent;
-    public Thickness BorderThickness => IsSelected ? new Thickness(1) : new Thickness(0);
 
-    public TypeView(TypeItem model) : base(model)
+    public TypeView(TypeItem model, SelectionManager selectionManager)
+        : base(model, selectionManager)
     {
         Children = new ObservableCollection<InlineNodeView>(
-            model.Children.Select(ViewFactory.Create)
+            model.Children.Select(child => ViewFactory.Create(child, selectionManager))
         );
-        
+
         model.PropertyChanged += ModelOnPropertyChanged;
     }
 

@@ -23,14 +23,19 @@
             <Border Background="{Binding Background}"
                     BorderBrush="{Binding BorderBrush}"
                     BorderThickness="{Binding BorderThickness}"
-                    Padding="2,0,2,0"
-                    PointerPressed="InlineNode_PointerPressed">
-                <TextBlock>
-                    <TextBlock.Inlines>
-                        <Run Text="{Binding Tag, Converter={StaticResource TagDisplayConverter}}"
-                             BaselineAlignment="Superscript"
-                             FontSize="10"/>
-                    </TextBlock.Inlines>
+                    Padding="2,0,2,0">
+                <StackPanel Orientation="Horizontal">
+            
+                    <Border PointerPressed="InlineNode_PointerPressed">
+                        <TextBlock>
+                            <TextBlock.Inlines>
+                                <Run Text="{Binding Tag, Converter={StaticResource TagDisplayConverter}}"
+                                     BaselineAlignment="Superscript"
+                                     FontSize="10"/>
+                            </TextBlock.Inlines>
+                        </TextBlock>
+                    </Border>
+
                     <ItemsControl ItemsSource="{Binding Children}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -38,7 +43,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                </TextBlock>
+                </StackPanel>
             </Border>
         </DataTemplate>
     </Window.DataTemplates>
