@@ -12,9 +12,10 @@ public partial class MainWindow : Window
 {
     private Document? _document;
     private DocumentView? _documentView;
-    
+
     private readonly SelectionManager _selectionManager = new();
     private readonly SelectionController _selectionController;
+    private DocumentEditor? _documentEditor;
 
     public MainWindow()
     {
@@ -42,6 +43,10 @@ public partial class MainWindow : Window
             AppState.SaveLastFile(Document.FilePath);
 
         _documentView = new DocumentView(Document, _selectionManager);
+        _documentEditor = new DocumentEditor(Document, _selectionManager);
+        _documentEditor.DocumentChanged = RefreshDocumentView;
+        NeContextMenu.SetEditor(_documentEditor);
+
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
 
@@ -65,7 +70,26 @@ public partial class MainWindow : Window
 
         Document = await Document.OpenDocument(path);
 
-        _documentView = new DocumentView(Document,_selectionManager);
+        _documentView = new DocumentView(Document, _selectionManager);
+        _documentEditor = new DocumentEditor(Document, _selectionManager);
+        _documentEditor.DocumentChanged = RefreshDocumentView;
+        NeContextMenu.SetEditor(_documentEditor);
+
+        ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
+    }
+
+    private void RefreshDocumentView()
+    {
+        if (_document is null)
+            return;
+
+        _selectionManager.Clear();
+        _documentView = new DocumentView(_document, _selectionManager);
+        _documentEditor = new DocumentEditor(_document, _selectionManager);
+        _documentEditor.DocumentChanged = RefreshDocumentView;
+        NeContextMenu.SetEditor(_documentEditor);
+
+        ParagraphsItemsControl.ItemsSource = null;
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
 }

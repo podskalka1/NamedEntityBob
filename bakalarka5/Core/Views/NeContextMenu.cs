@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using bakalarka5.Core.Models;
@@ -7,9 +6,15 @@ namespace bakalarka5.Core.Views;
 
 public static class NeContextMenu
 {
-    public static Action<InlineNodeView, string?>? ApplyTypeAction { get; set; }
+    private static DocumentEditor? _editor;
+    private static readonly ContextMenu _menu = BuildContextMenu();
 
-    private static ContextMenu BuildContextMenu(InlineNodeView node)
+    public static void SetEditor(DocumentEditor? editor)
+    {
+        _editor = editor;
+    }
+
+    private static ContextMenu BuildContextMenu()
     {
         MenuItem BuildMenuItem(NeType type)
         {
@@ -20,8 +25,7 @@ public static class NeContextMenu
 
             item.Click += (_, _) =>
             {
-                ApplyTypeAction?.Invoke(node, type.Type);
-                //node.IsSelected = false;
+                _editor?.ApplyTypeToSelection(type.Type);
             };
 
             return item;
@@ -69,12 +73,9 @@ public static class NeContextMenu
         };
     }
 
-    public static void OpenMenu(Border border, InlineNodeView node)
+    public static void OpenMenu(Control target)
     {
-        //node.IsSelected = true;
-
-        var menu = BuildContextMenu(node);
-        border.ContextMenu = menu;
-        menu.Open(border);
+        target.ContextMenu = _menu;
+        _menu.Open(target);
     }
 }
