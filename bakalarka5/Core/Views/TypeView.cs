@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using Avalonia.Media;
@@ -34,6 +35,7 @@ public class TypeView : InlineNodeView
         );
 
         model.PropertyChanged += ModelOnPropertyChanged;
+        model.Children.CollectionChanged += ModelChildrenOnCollectionChanged;
     }
 
     private void ModelOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -42,6 +44,53 @@ public class TypeView : InlineNodeView
         {
             OnPropertyChanged(nameof(Tag));
             OnPropertyChanged(nameof(Background));
+        }
+    }
+
+    private void ModelChildrenOnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add:
+                if (e.NewItems is null) return;
+
+                int addIndex = e.NewStartingIndex;
+                foreach (InlineNode node in e.NewItems)
+                {
+                    Children.Insert(addIndex, ViewFactory.Create(node, SelectionManager));
+                    addIndex++;
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Remove:
+                if (e.OldItems is null) return;
+
+                for (int i = 0; i < e.OldItems.Count; i++)
+                {
+                    Children.RemoveAt(e.OldStartingIndex);
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Replace:
+                if (e.NewItems is null) return;
+
+                for (int i = 0; i < e.NewItems.Count; i++)
+                {
+                    Children[e.NewStartingIndex + i] =
+                        ViewFactory.Create((InlineNode)e.NewItems[i]!, SelectionManager);
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Reset:
+                Children.Clear();
+                foreach (var child in TypeModel.Children)
+                {
+                    Children.Add(ViewFactory.Create(child, SelectionManager));
+                }
+                break;
+
+            case NotifyCollectionChangedAction.Move:
+                break;
         }
     }
 

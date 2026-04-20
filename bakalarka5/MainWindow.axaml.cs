@@ -12,10 +12,10 @@ public partial class MainWindow : Window
 {
     private Document? _document;
     private DocumentView? _documentView;
+    private DocumentEditor? _documentEditor;
 
     private readonly SelectionManager _selectionManager = new();
     private readonly SelectionController _selectionController;
-    private DocumentEditor? _documentEditor;
 
     public MainWindow()
     {
@@ -37,17 +37,10 @@ public partial class MainWindow : Window
         if (document is null)
             return;
 
-        Document = document;
+        if (document.FilePath is not null)
+            AppState.SaveLastFile(document.FilePath);
 
-        if (Document.FilePath is not null)
-            AppState.SaveLastFile(Document.FilePath);
-
-        _documentView = new DocumentView(Document, _selectionManager);
-        _documentEditor = new DocumentEditor(Document, _selectionManager);
-        _documentEditor.DocumentChanged = RefreshDocumentView;
-        NeContextMenu.SetEditor(_documentEditor);
-
-        ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
+        LoadDocumentIntoView(document);
     }
 
     private void InlineNode_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -68,28 +61,19 @@ public partial class MainWindow : Window
         if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
             return;
 
-        Document = await Document.OpenDocument(path);
-
-        _documentView = new DocumentView(Document, _selectionManager);
-        _documentEditor = new DocumentEditor(Document, _selectionManager);
-        _documentEditor.DocumentChanged = RefreshDocumentView;
-        NeContextMenu.SetEditor(_documentEditor);
-
-        ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
+        var document = await Document.OpenDocument(path);
+        LoadDocumentIntoView(document);
     }
 
-    private void RefreshDocumentView()
+    private void LoadDocumentIntoView(Document document)
     {
-        if (_document is null)
-            return;
-
         _selectionManager.Clear();
-        _documentView = new DocumentView(_document, _selectionManager);
-        _documentEditor = new DocumentEditor(_document, _selectionManager);
-        _documentEditor.DocumentChanged = RefreshDocumentView;
-        NeContextMenu.SetEditor(_documentEditor);
 
-        ParagraphsItemsControl.ItemsSource = null;
+        Document = document;
+        _documentView = new DocumentView(document, _selectionManager);
+        _documentEditor = new DocumentEditor(document, _selectionManager);
+
+        NeContextMenu.SetEditor(_documentEditor);
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
 }
