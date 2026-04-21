@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using bakalarka5.Core.Models;
+using bakalarka5.Core.DocumentModel;
 
-namespace bakalarka5.Core.Views;
+namespace bakalarka5.Core.Selection;
 
 public class SelectionManager : INotifyPropertyChanged
 {

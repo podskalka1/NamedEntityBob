@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace bakalarka5.Core.Models;
+namespace bakalarka5.Core.DocumentModel;
 
 public class ParagraphItem
 {

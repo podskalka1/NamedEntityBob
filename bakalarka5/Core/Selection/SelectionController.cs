@@ -1,7 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using bakalarka5.UI.DocumentUI;
+using bakalarka5.UI.Menus;
 
-namespace bakalarka5.Core.Views;
+namespace bakalarka5.Core.Selection;
 
 public class SelectionController
 {

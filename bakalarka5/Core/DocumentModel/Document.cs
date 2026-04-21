@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using bakalarka5.Core.Annotation;
 
-namespace bakalarka5.Core.Models;
+namespace bakalarka5.Core.DocumentModel;
 
 public class Document
 {

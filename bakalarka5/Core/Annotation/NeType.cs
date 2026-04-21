@@ -1,4 +1,4 @@
-namespace bakalarka5.Core.Models;
+namespace bakalarka5.Core.Annotation;
 
 public class NeType(string type, string description)
 {

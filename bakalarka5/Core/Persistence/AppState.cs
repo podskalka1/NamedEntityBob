@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace bakalarka5.Core.Models;
+namespace bakalarka5.Core.Persistence;
 
 
 public static class AppState

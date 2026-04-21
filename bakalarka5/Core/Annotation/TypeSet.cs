@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace bakalarka5.Core.Models;
+namespace bakalarka5.Core.Annotation;
 
 public static class TypeSet
 {

@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:view="clr-namespace:bakalarka5.Core.Views"
+        xmlns:documentUi="clr-namespace:bakalarka5.UI.DocumentUI"
         mc:Ignorable="d"
         d:DesignWidth="800"
         d:DesignHeight="450"
@@ -10,7 +10,7 @@
         Title="bakalarka5">
 
     <Window.DataTemplates>
-        <DataTemplate x:DataType="view:TokenView">
+        <DataTemplate x:DataType="documentUi:TokenView">
             <Border BorderBrush="{Binding BorderBrush}"
                     BorderThickness="{Binding BorderThickness}"
                     Padding="2,0,2,0"
@@ -19,7 +19,7 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:DataType="view:TypeView">
+        <DataTemplate x:DataType="documentUi:TypeView">
             <Border Background="{Binding Background}"
                     BorderBrush="{Binding BorderBrush}"
                     BorderThickness="{Binding BorderThickness}"
@@ -53,6 +53,7 @@
             <MenuItem Header="_File">
                 <MenuItem Header="_Open..." Click="FileOpenMenuItem"/>
             </MenuItem>
+            <MenuItem Header="_Settings" Click="SettingsMenuItem"/>
         </Menu>
 
         <ScrollViewer x:Name="DocumentScroll"
@@ -60,7 +61,7 @@
                       HorizontalScrollBarVisibility="Auto">
             <ItemsControl x:Name="ParagraphsItemsControl">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate x:DataType="view:ParagraphView">
+                    <DataTemplate x:DataType="documentUi:ParagraphView">
                         <ItemsControl ItemsSource="{Binding Lines}"
                                       Margin="0,0,0,12"
                                       Width="{Binding #DocumentScroll.Bounds.Width}">
@@ -71,7 +72,7 @@
                             </ItemsControl.ItemsPanel>
 
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="view:LineView">
+                                <DataTemplate x:DataType="documentUi:LineView">
                                     <ItemsControl ItemsSource="{Binding Nodes}">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>

@@ -1,7 +1,7 @@
 using System;
-using bakalarka5.Core.Models;
+using bakalarka5.Core.DocumentModel;
 
-namespace bakalarka5.Core.Views;
+namespace bakalarka5.Core.Selection;
 
 public class SelectionRange
 {

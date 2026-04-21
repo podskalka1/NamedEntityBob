@@ -1,12 +1,12 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:views="clr-namespace:bakalarka5.Core.Views"
+             xmlns:formatting="clr-namespace:bakalarka5.UI.Formatting"
              x:Class="bakalarka5.App"
              RequestedThemeVariant="Default">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
              <Application.Resources>
-                 <views:TagDisplayConverter x:Key="TagDisplayConverter" />
+                 <formatting:TagDisplayConverter x:Key="TagDisplayConverter" />
              </Application.Resources>
              <Application.Styles>
         <FluentTheme />

@@ -3,8 +3,12 @@ using System.IO;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using bakalarka5.Core.Models;
-using bakalarka5.Core.Views;
+using bakalarka5.Core.Annotation;
+using bakalarka5.Core.DocumentModel;
+using bakalarka5.Core.Persistence;
+using bakalarka5.Core.Selection;
+using bakalarka5.UI.DocumentUI;
+using bakalarka5.UI.Menus;
 
 namespace bakalarka5;
 
@@ -75,5 +79,11 @@ public partial class MainWindow : Window
 
         NeContextMenu.SetEditor(_documentEditor);
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
+    }
+
+    private void SettingsMenuItem(object? sender, RoutedEventArgs e)
+    {
+        var settingsWindow = new SettingsWindow();
+        settingsWindow.Show(this); // non-modal, owned by MainWindow
     }
 }

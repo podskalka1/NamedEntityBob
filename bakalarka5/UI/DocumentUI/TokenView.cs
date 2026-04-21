@@ -1,6 +1,7 @@
-using bakalarka5.Core.Models;
+using bakalarka5.Core.DocumentModel;
+using bakalarka5.Core.Selection;
 
-namespace bakalarka5.Core.Views;
+namespace bakalarka5.UI.DocumentUI;
 
 public class TokenView : InlineNodeView
 {

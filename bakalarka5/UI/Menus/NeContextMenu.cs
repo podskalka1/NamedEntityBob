@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Avalonia.Controls;
-using bakalarka5.Core.Models;
+using bakalarka5.Core.Annotation;
 
-namespace bakalarka5.Core.Views;
+namespace bakalarka5.UI.Menus;
 
 public static class NeContextMenu
 {

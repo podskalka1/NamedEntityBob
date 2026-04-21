@@ -1,7 +1,8 @@
-namespace bakalarka5.Core.Models;
-
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using bakalarka5.Core.DocumentModel;
+
+namespace bakalarka5.Core.Annotation;
 
 public class TypeItem : InlineContainerNode, INotifyPropertyChanged
 {
