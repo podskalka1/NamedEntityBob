@@ -1,8 +1,10 @@
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using bakalarka5.Core.Annotation;
 using bakalarka5.Core.DocumentModel;
 using bakalarka5.Core.Persistence;
@@ -95,5 +97,55 @@ public partial class MainWindow : Window
     {
         var settingsWindow = new SettingsWindow();
         settingsWindow.Show(this); // non-modal, owned by MainWindow
+    }
+
+    private async void FileSaveMenuItem(object? sender, RoutedEventArgs e)
+    {
+        if (_document is null)
+            return;
+
+        if (_document.FilePath is null)
+        {
+            await SaveDocumentAs();
+            return;
+        }
+
+        await _document.Save();
+    }
+
+    private async void FileSaveAsMenuItem(object? sender, RoutedEventArgs e)
+    {
+        await SaveDocumentAs();
+    }
+
+    private async Task SaveDocumentAs()
+    {
+        if (_document is null)
+            return;
+
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null)
+            return;
+
+        var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Save document as",
+            SuggestedFileName = "document.ne",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Named Entities")
+                {
+                    Patterns = ["*.ne"]
+                },
+                FilePickerFileTypes.All
+            ]
+        });
+
+        if (file is null)
+            return;
+
+        var path = file.Path.LocalPath;
+        await _document.SaveAs(path);
+        AppState.SaveLastFile(path);
     }
 }
