@@ -21,6 +21,9 @@ public class Document
     public string? FilePath { get; private set; }
 
     public ObservableCollection<ParagraphItem> Paragraphs { get; private set; }
+    
+    public string DocumentTitle =>
+        (string?)_rootTemplate.Attribute("title") ?? "Untitled";
 
     private Document(
         ObservableCollection<ParagraphItem> paragraphs,

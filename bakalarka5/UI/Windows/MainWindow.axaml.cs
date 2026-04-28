@@ -22,6 +22,8 @@ public partial class MainWindow : Window
 
     private readonly SelectionManager _selectionManager = new();
     private readonly SelectionController _selectionController;
+    
+    private bool _isModified;
 
     public MainWindow()
     {
@@ -86,9 +88,17 @@ public partial class MainWindow : Window
         _selectionManager.Clear();
 
         Document = document;
+        _isModified = false;
+        UpdateWindowTitle();
         _documentView = new DocumentView(document, _selectionManager);
         _documentEditor = new DocumentEditor(document, _selectionManager);
-
+        
+        _documentEditor.DocumentChanged = () =>
+        {
+            _isModified = true;
+            UpdateWindowTitle();
+        };
+        
         NeContextMenu.SetEditor(_documentEditor);
         ParagraphsItemsControl.ItemsSource = _documentView.Paragraphs;
     }
@@ -111,6 +121,8 @@ public partial class MainWindow : Window
         }
 
         await _document.Save();
+        _isModified = false;
+        UpdateWindowTitle();
     }
 
     private async void FileSaveAsMenuItem(object? sender, RoutedEventArgs e)
@@ -146,6 +158,22 @@ public partial class MainWindow : Window
 
         var path = file.Path.LocalPath;
         await _document.SaveAs(path);
+        _isModified = false;
+        UpdateWindowTitle();
         AppState.SaveLastFile(path);
+    }
+    
+    private void UpdateWindowTitle()
+    {
+        var docTitle = _document?.DocumentTitle ?? "No Document";
+
+        var fileName =
+            _document?.FilePath is null
+                ? "Unsaved"
+                : Path.GetFileName(_document.FilePath);
+
+        var modified = _isModified ? " *" : "";
+
+        Title = $"bakalarka5 - {docTitle} - {fileName}{modified}";
     }
 }
