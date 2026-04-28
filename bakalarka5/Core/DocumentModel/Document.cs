@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using bakalarka5.Core.Annotation;
+using bakalarka5.UI.Windows;
 
 namespace bakalarka5.Core.DocumentModel;
 
@@ -21,6 +22,10 @@ public class Document
     {
         Paragraphs = paragraphs;
         FilePath = filePath;
+        foreach (var paragraph in Paragraphs)
+        {
+            paragraph.Document = this;
+        }
     }
 
     public static async Task<Document?> OpenDocument(MainWindow mainWindow)
@@ -94,6 +99,11 @@ public class Document
 
         ParseNodesIntoLines(pElement.Nodes(), paragraph, ref currentLine, currentLine);
 
+        foreach (var line in paragraph.Lines)
+        {
+            line.Paragraph = paragraph;
+        }
+        
         return paragraph;
     }
 

@@ -110,4 +110,83 @@ public class DocumentEditor
 
         return result;
     }
+    
+    public bool CanDeleteSelection()
+    {
+        var selection = _selectionManager.Current;
+        return selection is not null
+               && selection.StartIndex >= 0
+               && selection.EndIndex < selection.Parent.Children.Count
+               && selection.StartIndex <= selection.EndIndex;
+    }
+
+    public void DeleteSelection()
+    {
+        var selection = _selectionManager.Current;
+        if (selection is null)
+            return;
+
+        for (int i = selection.EndIndex; i >= selection.StartIndex; i--)
+        {
+            selection.Parent.RemoveChild(selection.Parent.Children[i]);
+        }
+
+        _selectionManager.Clear();
+        DocumentChanged?.Invoke();
+    }
+
+    public bool CanDeleteCurrentLine()
+    {
+        var selection = _selectionManager.Current;
+        if (selection is null)
+            return false;
+
+        var line = FindParentLine(selection.Parent);
+
+        return line is not null && line.Children.Count > 0;
+    }
+
+    public void DeleteCurrentLine()
+    {
+        var selection = _selectionManager.Current;
+        if (selection is null)
+            return;
+
+        var line = FindParentLine(selection.Parent);
+        if (line is null || line.Children.Count == 0)
+            return;
+
+        _selectionManager.SelectSingle(line.Children[0]);
+        _selectionManager.ExtendSelectionTo(line.Children[^1]);
+
+        DeleteSelection();
+
+        if (line.Children.Count != 0 || line.Paragraph is null) return;
+        var paragraph = line.Paragraph;
+
+        paragraph.Lines.Remove(line);
+        line.Paragraph = null;
+
+        if (paragraph.Lines.Count == 0 && paragraph.Document is not null)
+        {
+            var document = paragraph.Document;
+            document.Paragraphs.Remove(paragraph);
+            paragraph.Document = null;
+        }
+
+        DocumentChanged?.Invoke();
+    }
+
+    private static LineItem? FindParentLine(InlineNode? node)
+    {
+        while (node is not null)
+        {
+            if (node is LineItem line)
+                return line;
+
+            node = node.Parent;
+        }
+
+        return null;
+    }
 }

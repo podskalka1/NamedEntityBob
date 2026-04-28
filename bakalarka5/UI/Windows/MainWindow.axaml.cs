@@ -10,7 +10,7 @@ using bakalarka5.Core.Selection;
 using bakalarka5.UI.DocumentUI;
 using bakalarka5.UI.Menus;
 
-namespace bakalarka5;
+namespace bakalarka5.UI.Windows;
 
 public partial class MainWindow : Window
 {
@@ -55,6 +55,16 @@ public partial class MainWindow : Window
         if (border.DataContext is not InlineNodeView node)
             return;
 
+        var lineCount = 0;
+        foreach (var paragraph in _document.Paragraphs)
+        {
+            foreach (var line in paragraph.Lines)
+            {
+                lineCount++;
+            }
+        }
+        Console.Out.WriteLine(lineCount);
+        
         _selectionController.HandlePointerPressed(border, node, e);
     }
 

@@ -1,12 +1,17 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Avalonia.Controls;
+using Avalonia.VisualTree;
 using bakalarka5.Core.Annotation;
+using bakalarka5.UI.Windows;
 
 namespace bakalarka5.UI.Menus;
 
 public static class NeContextMenu
 {
     private static DocumentEditor? _editor;
+    private static Window? _ownerWindow;
+
     private static readonly ContextMenu _menu = BuildContextMenu();
 
     public static void SetEditor(DocumentEditor? editor)
@@ -53,6 +58,40 @@ public static class NeContextMenu
             return subMenu;
         }
 
+        var deleteSelectionItem = new MenuItem
+        {
+            Header = "Delete selection"
+        };
+
+        deleteSelectionItem.Click += async (_, _) =>
+        {
+            if (_editor?.CanDeleteSelection() != true)
+                return;
+
+            if (_ownerWindow is null)
+                return;
+
+            if (await ConfirmDeletion(_ownerWindow))
+                _editor.DeleteSelection();
+        };
+
+        var deleteLineItem = new MenuItem
+        {
+            Header = "Delete line"
+        };
+
+        deleteLineItem.Click += async (_, _) =>
+        {
+            if (_editor?.CanDeleteCurrentLine() != true)
+                return;
+
+            if (_ownerWindow is null)
+                return;
+
+            if (await ConfirmDeletion(_ownerWindow))
+                _editor.DeleteCurrentLine();
+        };
+
         var items = new List<MenuItem>
         {
             BuildSubMenu(TypeSet.NumbersType, TypeSet.Numbers),
@@ -64,7 +103,10 @@ public static class NeContextMenu
             BuildSubMenu(TypeSet.PersonsType, TypeSet.Persons),
             BuildSubMenu(TypeSet.TimeType, TypeSet.Time),
             new MenuItem { Header = "-" },
-            BuildMenuItem(TypeSet.NoneType)
+            BuildMenuItem(TypeSet.NoneType),
+            new MenuItem { Header = "-" },
+            deleteSelectionItem,
+            deleteLineItem
         };
 
         return new ContextMenu
@@ -75,7 +117,15 @@ public static class NeContextMenu
 
     public static void OpenMenu(Control target)
     {
+        _ownerWindow = target.GetVisualRoot() as Window;
+
         target.ContextMenu = _menu;
         _menu.Open(target);
+    }
+
+    private static async Task<bool> ConfirmDeletion(Window owner)
+    {
+        var dialog = new DeleteConfirmWindow();
+        return await dialog.ShowDialog<bool>(owner);
     }
 }

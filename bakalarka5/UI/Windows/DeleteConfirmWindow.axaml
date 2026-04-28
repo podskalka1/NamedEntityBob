@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="bakalarka5.UI.Windows.DeleteConfirmWindow"
+        Title="Confirm"
+        Width="350"
+        Height="160"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False">
+    
+    <StackPanel Margin="20" Spacing="12">
+        <TextBlock Text="Deletion is irreversible. Do you wish to proceed?"/>
+        
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <Button Content="Cancel" Click="Cancel_Click"/>
+            <Button Content="Delete" Click="Delete_Click"/>
+        </StackPanel>
+    </StackPanel>
+</Window>
