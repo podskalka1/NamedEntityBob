@@ -20,4 +20,13 @@ public class CurationConflict
     
     public NormalizedAnnotationSpan? NormalizedSpanA { get; init; }
     public NormalizedAnnotationSpan? NormalizedSpanB { get; init; }
+    
+    public CurationResolutionKind Resolution { get; private set; } = CurationResolutionKind.Unresolved;
+
+    public bool IsResolved => Resolution != CurationResolutionKind.Unresolved;
+
+    public void Resolve(CurationResolutionKind resolution)
+    {
+        Resolution = resolution;
+    }
 }

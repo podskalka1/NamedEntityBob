@@ -296,9 +296,7 @@ public class Document
     
     public static async Task<Document> LoadFromPath(string path)
     {
-        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-        
         var text = await File.ReadAllTextAsync(path);
-        return Parse(text);
+        return Parse(text, path);
     }
 }

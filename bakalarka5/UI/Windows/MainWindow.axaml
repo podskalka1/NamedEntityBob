@@ -57,6 +57,7 @@
             </MenuItem>
             <MenuItem Header="_Settings" Click="SettingsMenuItem"/>
             <MenuItem Header="Debug" Click="DebugClick"/>
+            <MenuItem Header="Curate" Click="OpenCurationWindowClick"/>
         </Menu>
 
         <ScrollViewer x:Name="DocumentScroll"

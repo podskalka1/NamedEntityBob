@@ -1,0 +1,170 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:curationUi="clr-namespace:bakalarka5.UI.CurationUI"
+        x:Class="bakalarka5.UI.Windows.CurationWindow"
+        Width="1200"
+        Height="800"
+        Title="Curation">
+
+    <Window.DataTemplates>
+        <DataTemplate x:DataType="curationUi:CurationConflictListItem">
+            <TextBlock Text="{Binding Label}" TextWrapping="Wrap"/>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="curationUi:CurationTokenView">
+            <Border Background="{Binding Background}"
+                    BorderBrush="{Binding BorderBrush}"
+                    BorderThickness="{Binding BorderThickness}"
+                    Padding="2,0,2,0"
+                    Margin="0,0,1,1"
+                    PointerPressed="CurationToken_OnPointerPressed"
+                    ToolTip.Tip="{Binding ToolTip}">
+                <Border.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Use A" Click="UseAFromContext_OnClick"/>
+                        <MenuItem Header="Use B" Click="UseBFromContext_OnClick"/>
+                        <MenuItem Header="Use neither" Click="UseNeitherFromContext_OnClick"/>
+                    </ContextMenu>
+                </Border.ContextMenu>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock IsVisible="{Binding HasAnnotation}">
+                        <TextBlock.Inlines>
+                            <Run Text="{Binding AnnotationText}"
+                                 BaselineAlignment="Superscript"
+                                 FontSize="10"/>
+                        </TextBlock.Inlines>
+                    </TextBlock>
+
+                    <TextBlock Text="{Binding Text}"/>
+                </StackPanel>
+            </Border>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="curationUi:CurationLineView">
+            <ItemsControl ItemsSource="{Binding Tokens}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <Grid RowDefinitions="Auto,*,Auto"
+          ColumnDefinitions="280,*"
+          Margin="12">
+
+        <TextBlock Grid.Row="0"
+                   Grid.ColumnSpan="2"
+                   x:Name="HeaderText"
+                   FontSize="18"
+                   FontWeight="Bold"
+                   Margin="0,0,0,12"/>
+
+        <ListBox Grid.Row="1"
+                 Grid.Column="0"
+                 x:Name="ConflictListBox"
+                 SelectionChanged="ConflictListBox_OnSelectionChanged"
+                 Margin="0,0,12,0"/>
+
+        <Grid Grid.Row="1"
+              Grid.Column="1"
+              RowDefinitions="*,*"
+              RowSpacing="12">
+
+            <Border Grid.Row="0"
+                    BorderBrush="#9AA0A6"
+                    BorderThickness="1"
+                    Padding="8">
+
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Annotator A"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"/>
+
+                    <ScrollViewer x:Name="DocumentAScroll"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="DocumentAItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="curationUi:CurationLineView">
+                                    <ItemsControl ItemsSource="{Binding Tokens}"
+                                                  Margin="0,0,0,4"
+                                                  Width="{Binding #DocumentAScroll.Bounds.Width}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Row="1"
+                    BorderBrush="#9AA0A6"
+                    BorderThickness="1"
+                    Padding="8">
+
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Top"
+                               Text="Annotator B"
+                               FontWeight="Bold"
+                               Margin="0,0,0,8"/>
+
+                    <ScrollViewer x:Name="DocumentBScroll"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Auto">
+                        <ItemsControl x:Name="DocumentBItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="curationUi:CurationLineView">
+                                    <ItemsControl ItemsSource="{Binding Tokens}"
+                                                  Margin="0,0,0,4"
+                                                  Width="{Binding #DocumentBScroll.Bounds.Width}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <WrapPanel/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="2"
+                    Grid.ColumnSpan="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Spacing="8"
+                    Margin="0,12,0,0">
+
+            <TextBlock x:Name="ConflictKindText"
+                       VerticalAlignment="Center"
+                       Margin="0,0,24,0"/>
+
+            <TextBlock Text="Resolution:"
+                       VerticalAlignment="Center"/>
+
+            <TextBlock x:Name="ResolutionText"
+                       VerticalAlignment="Center"
+                       Margin="0,0,24,0"/>
+
+            <Button Content="Previous" Click="PreviousButton_OnClick"/>
+            <Button Content="Next" Click="NextButton_OnClick"/>
+
+            <Button Content="Use A" Click="UseAButton_OnClick"/>
+            <Button Content="Use B" Click="UseBButton_OnClick"/>
+            <Button Content="Use neither" Click="UseNeitherButton_OnClick"/>
+        </StackPanel>
+    </Grid>
+</Window>

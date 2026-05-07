@@ -188,4 +188,37 @@ public partial class MainWindow : Window
 
         CurationDebugPrinter.Print(docA, docB);
     }
+
+    private async void OpenCurationWindowClick(object? sender, RoutedEventArgs e)
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null)
+            return;
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select two annotation files",
+            AllowMultiple = true,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Named Entities")
+                {
+                    Patterns = ["*.ne"]
+                },
+                FilePickerFileTypes.All
+            ]
+        });
+
+        if (files.Count < 2)
+            return;
+
+        var pathA = files[0].Path.LocalPath;
+        var pathB = files[1].Path.LocalPath;
+
+        var documentA = await Document.OpenDocument(pathA);
+        var documentB = await Document.OpenDocument(pathB);
+
+        var window = new CurationWindow(documentA, documentB);
+        await window.ShowDialog(this);
+    }
 }
