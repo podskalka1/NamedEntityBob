@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using bakalarka5.Core.Annotation;
+using bakalarka5.Core.Curation;
 using bakalarka5.Core.DocumentModel;
 using bakalarka5.Core.Persistence;
 using bakalarka5.Core.Selection;
@@ -175,5 +176,16 @@ public partial class MainWindow : Window
         var modified = _isModified ? " *" : "";
 
         Title = $"bakalarka5 - {docTitle} - {fileName}{modified}";
+    }
+
+    private async void DebugClick(object? sender, RoutedEventArgs e)
+    {
+        var pathA = @"C:\Users\luk20\Desktop\ne\test_missingLineIncluded.ne";
+        var pathB = @"C:\Users\luk20\Desktop\ne\test_missingLineExcluded.ne";
+
+        var docA = await Document.LoadFromPath(pathA);
+        var docB = await Document.LoadFromPath(pathB);
+
+        CurationDebugPrinter.Print(docA, docB);
     }
 }
