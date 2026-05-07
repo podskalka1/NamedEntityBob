@@ -28,26 +28,21 @@ public class CurationTokenView
     {
         get
         {
-            if (Conflict is null)
-                return AnnotationBrush;
-
-            if (Conflict.IsResolved)
-                return new SolidColorBrush(Color.FromRgb(207, 232, 211));
-
-            return Side == AnnotatorSide.A
-                ? new SolidColorBrush(Color.FromRgb(255, 236, 166))
-                : new SolidColorBrush(Color.FromRgb(255, 213, 213));
+            return AnnotationBrush;
         }
     }
 
     public IBrush BorderBrush =>
         IsCurrentConflict
             ? new SolidColorBrush(Color.FromRgb(45, 92, 180))
-            : HasConflict
-                ? new SolidColorBrush(Color.FromRgb(130, 95, 30))
+            : HasConflict && Conflict?.IsResolved != true
+                ? new SolidColorBrush(Color.FromRgb(194, 80, 34))
                 : Brushes.Transparent;
 
-    public Thickness BorderThickness => HasConflict ? new Thickness(IsCurrentConflict ? 2 : 1) : new Thickness(0);
+    public Thickness BorderThickness =>
+        HasConflict && Conflict?.IsResolved != true
+            ? new Thickness(0, 0, 0, IsCurrentConflict ? 3 : 2)
+            : new Thickness(0);
 
     public string ToolTip
     {

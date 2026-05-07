@@ -29,7 +29,8 @@ public static class NormalizedSpanExtractor
         for (int tokenIndex = 0; tokenIndex < line.Tokens.Count; tokenIndex++)
         {
             var token = line.Tokens[tokenIndex];
-            var position = positionMap.Get(token);
+            if (!positionMap.TryGet(token, out var position))
+                return;
 
             var currentKeys = token.AnnotationPath
                 .Select((layer, depth) => (Depth: depth, layer.InstanceId))
@@ -40,7 +41,7 @@ public static class NormalizedSpanExtractor
                 if (!currentKeys.Contains(key))
                 {
                     var builder = open[key];
-                    result.Add(builder.Build(position));
+                    result.Add(builder.Build(position, tokenIndex));
                     open.Remove(key);
                 }
             }
@@ -57,6 +58,7 @@ public static class NormalizedSpanExtractor
                         Type = layer.Type,
                         LineIndex = line.OriginalIndex,
                         StartPosition = position,
+                        OriginalStartTokenIndex = tokenIndex,
                         Depth = depth
                     };
                 }
@@ -69,7 +71,7 @@ public static class NormalizedSpanExtractor
 
         foreach (var builder in open.Values)
         {
-            result.Add(builder.Build(endPosition));
+            result.Add(builder.Build(endPosition, line.Tokens.Count));
         }
     }
 
@@ -78,9 +80,10 @@ public static class NormalizedSpanExtractor
         public string Type { get; init; } = "";
         public int LineIndex { get; init; }
         public int StartPosition { get; init; }
+        public int OriginalStartTokenIndex { get; init; }
         public int Depth { get; init; }
 
-        public NormalizedAnnotationSpan Build(int endPosition)
+        public NormalizedAnnotationSpan Build(int endPosition, int originalEndTokenIndex)
         {
             return new NormalizedAnnotationSpan
             {
@@ -88,6 +91,8 @@ public static class NormalizedSpanExtractor
                 LineIndex = LineIndex,
                 StartPosition = StartPosition,
                 EndPosition = endPosition,
+                OriginalStartTokenIndex = OriginalStartTokenIndex,
+                OriginalEndTokenIndex = originalEndTokenIndex,
                 Depth = Depth
             };
         }

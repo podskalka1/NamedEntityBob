@@ -7,6 +7,7 @@
         d:DesignWidth="800"
         d:DesignHeight="450"
         x:Class="bakalarka5.UI.Windows.MainWindow"
+        WindowState="Maximized"
         Title="bakalarka5">
 
     <Window.DataTemplates>
@@ -56,7 +57,6 @@
                 <MenuItem Header="Save _As..." Click="FileSaveAsMenuItem"/>
             </MenuItem>
             <MenuItem Header="_Settings" Click="SettingsMenuItem"/>
-            <MenuItem Header="Debug" Click="DebugClick"/>
             <MenuItem Header="Curate" Click="OpenCurationWindowClick"/>
         </Menu>
 

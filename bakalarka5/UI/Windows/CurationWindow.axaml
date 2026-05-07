@@ -4,11 +4,14 @@
         x:Class="bakalarka5.UI.Windows.CurationWindow"
         Width="1200"
         Height="800"
+        WindowState="Maximized"
         Title="Curation">
 
     <Window.DataTemplates>
         <DataTemplate x:DataType="curationUi:CurationConflictListItem">
-            <TextBlock Text="{Binding Label}" TextWrapping="Wrap"/>
+            <TextBlock Text="{Binding Label}"
+                       TextWrapping="Wrap"
+                       Padding="6,4"/>
         </DataTemplate>
 
         <DataTemplate x:DataType="curationUi:CurationTokenView">
@@ -41,14 +44,37 @@
             </Border>
         </DataTemplate>
 
-        <DataTemplate x:DataType="curationUi:CurationLineView">
-            <ItemsControl ItemsSource="{Binding Tokens}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel/>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
+        <DataTemplate x:DataType="curationUi:CurationLineVariantView">
+            <DockPanel Margin="0,0,0,3">
+                <TextBlock DockPanel.Dock="Left"
+                           Text="{Binding Header}"
+                           Width="20"
+                           FontWeight="Bold"
+                           Foreground="#5F6368"
+                           VerticalAlignment="Top"/>
+
+                <ItemsControl ItemsSource="{Binding Line.Tokens}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </DockPanel>
+        </DataTemplate>
+
+        <DataTemplate x:DataType="curationUi:CurationLineRowView">
+            <Border BorderBrush="#E0E0E0"
+                    BorderThickness="0,0,0,1"
+                    Padding="0,4">
+                <ItemsControl ItemsSource="{Binding Variants}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Border>
         </DataTemplate>
     </Window.DataTemplates>
 
@@ -66,80 +92,35 @@
         <ListBox Grid.Row="1"
                  Grid.Column="0"
                  x:Name="ConflictListBox"
+                 x:CompileBindings="False"
                  SelectionChanged="ConflictListBox_OnSelectionChanged"
-                 Margin="0,0,12,0"/>
+                 Margin="0,0,12,0">
+            <ListBox.Styles>
+                <Style Selector="ListBoxItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Background" Value="{Binding Background}"/>
+                </Style>
+            </ListBox.Styles>
+        </ListBox>
 
-        <Grid Grid.Row="1"
-              Grid.Column="1"
-              RowDefinitions="*,*"
-              RowSpacing="12">
-
-            <Border Grid.Row="0"
-                    BorderBrush="#9AA0A6"
-                    BorderThickness="1"
-                    Padding="8">
-
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="Annotator A"
-                               FontWeight="Bold"
-                               Margin="0,0,0,8"/>
-
-                    <ScrollViewer x:Name="DocumentAScroll"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="DocumentAItemsControl">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="curationUi:CurationLineView">
-                                    <ItemsControl ItemsSource="{Binding Tokens}"
-                                                  Margin="0,0,0,4"
-                                                  Width="{Binding #DocumentAScroll.Bounds.Width}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </DockPanel>
-            </Border>
-
-            <Border Grid.Row="1"
-                    BorderBrush="#9AA0A6"
-                    BorderThickness="1"
-                    Padding="8">
-
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top"
-                               Text="Annotator B"
-                               FontWeight="Bold"
-                               Margin="0,0,0,8"/>
-
-                    <ScrollViewer x:Name="DocumentBScroll"
-                                  VerticalScrollBarVisibility="Auto"
-                                  HorizontalScrollBarVisibility="Auto">
-                        <ItemsControl x:Name="DocumentBItemsControl">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="curationUi:CurationLineView">
-                                    <ItemsControl ItemsSource="{Binding Tokens}"
-                                                  Margin="0,0,0,4"
-                                                  Width="{Binding #DocumentBScroll.Bounds.Width}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <WrapPanel/>
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                    </ItemsControl>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </DockPanel>
-            </Border>
-        </Grid>
+        <Border Grid.Row="1"
+                Grid.Column="1"
+                BorderBrush="#9AA0A6"
+                BorderThickness="1"
+                Padding="8">
+            <ScrollViewer x:Name="DocumentScroll"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="DocumentRowsItemsControl"
+                              Width="{Binding #DocumentScroll.Bounds.Width}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
 
         <StackPanel Grid.Row="2"
                     Grid.ColumnSpan="2"

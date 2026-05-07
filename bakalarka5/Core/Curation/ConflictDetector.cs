@@ -33,17 +33,6 @@ public class ConflictDetector
                 continue;
             }
 
-            if (line.Kind == AlignmentKind.Different)
-            {
-                conflicts.Add(new CurationConflict
-                {
-                    Kind = ConflictKind.TextMismatch,
-                    LineA = line.A,
-                    LineB = line.B
-                });
-                continue;
-            }
-            
             var tokenAlignments = _tokenAligner.AlignTokens(line.A!, line.B!);
             var groups = TokenAlignmentGrouper.Group(tokenAlignments);
 
@@ -64,7 +53,7 @@ public class ConflictDetector
                 var tokenA = group.TokensA.Single();
                 var tokenB = group.TokensB.Single();
 
-                if (!AnnotationTypesEqual(tokenA, tokenB))
+                if (ShouldReportAnnotationMismatch(tokenA, tokenB))
                 {
                     conflicts.Add(new CurationConflict
                     {
@@ -77,6 +66,14 @@ public class ConflictDetector
         }
 
         return conflicts;
+    }
+
+    private static bool ShouldReportAnnotationMismatch(CurationToken a, CurationToken b)
+    {
+        if (a.AnnotationPath.Count == 0 || b.AnnotationPath.Count == 0)
+            return false;
+
+        return !AnnotationTypesEqual(a, b);
     }
     
     private static bool AnnotationTypesEqual(CurationToken a, CurationToken b)

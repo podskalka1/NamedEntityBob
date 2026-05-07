@@ -12,76 +12,102 @@ public class CurationLineView
     public CurationLineView(
         CurationLine model,
         AnnotatorSide side,
-        IReadOnlyList<CurationConflict> conflicts,
+        CurationLine? otherLine,
+        AnnotatorSide? resolvedSide,
+        IReadOnlyList<CurationConflict> lineConflicts,
         CurationConflict? currentConflict)
     {
         Model = model;
-        Tokens = model.Tokens
+        Tokens = BuildDisplayTokens(model, side, lineConflicts)
             .Select(token => new CurationTokenView(
                 token,
                 side,
-                FindConflict(token, side, conflicts),
+                CurationConflictLocator.FindConflict(token, side, lineConflicts, currentConflict),
                 currentConflict))
             .ToList();
     }
 
-    private static CurationConflict? FindConflict(
-        CurationToken token,
+    private static List<CurationToken> BuildDisplayTokens(
+        CurationLine line,
         AnnotatorSide side,
-        IReadOnlyList<CurationConflict> conflicts)
+        IReadOnlyList<CurationConflict> lineConflicts)
     {
-        foreach (var conflict in conflicts)
+        var replacements = lineConflicts
+            .Where(conflict => conflict is
+            {
+                Kind: ConflictKind.TextMismatch,
+                IsResolved: true
+            })
+            .Where(conflict => conflict.Resolution is CurationResolutionKind.UseA or CurationResolutionKind.UseB)
+            .Select(conflict => BuildReplacement(conflict, side))
+            .Where(replacement => replacement is not null)
+            .Select(replacement => replacement!)
+            .OrderBy(replacement => replacement.Start)
+            .ToList();
+
+        if (replacements.Count == 0)
+            return line.Tokens.ToList();
+
+        var result = new List<CurationToken>();
+        var tokenIndex = 0;
+
+        foreach (var replacement in replacements)
         {
-            if (ContainsToken(conflict, token, side))
-                return conflict;
+            while (tokenIndex < replacement.Start && tokenIndex < line.Tokens.Count)
+            {
+                result.Add(line.Tokens[tokenIndex]);
+                tokenIndex++;
+            }
+
+            result.AddRange(replacement.Tokens);
+            tokenIndex = replacement.End;
         }
+
+        while (tokenIndex < line.Tokens.Count)
+        {
+            result.Add(line.Tokens[tokenIndex]);
+            tokenIndex++;
+        }
+
+        return result;
+    }
+
+    private static TokenReplacement? BuildReplacement(CurationConflict conflict, AnnotatorSide side)
+    {
+        var affectedTokens = side == AnnotatorSide.A
+            ? conflict.TokensA
+            : conflict.TokensB;
+
+        var chosenTokens = conflict.Resolution == CurationResolutionKind.UseA
+            ? conflict.TokensA
+            : conflict.TokensB;
+
+        var start = GetStartIndex(affectedTokens, chosenTokens);
+        if (start is null)
+            return null;
+
+        var end = affectedTokens.Count == 0
+            ? start.Value
+            : affectedTokens.Max(token => token.OriginalTokenIndex) + 1;
+
+        return new TokenReplacement(start.Value, end, chosenTokens);
+    }
+
+    private static int? GetStartIndex(
+        IReadOnlyList<CurationToken> affectedTokens,
+        IReadOnlyList<CurationToken> chosenTokens)
+    {
+        if (affectedTokens.Count > 0)
+            return affectedTokens.Min(token => token.OriginalTokenIndex);
+
+        if (chosenTokens.Count > 0)
+            return chosenTokens.Min(token => token.OriginalTokenIndex);
 
         return null;
     }
 
-    private static bool ContainsToken(CurationConflict conflict, CurationToken token, AnnotatorSide side)
-    {
-        return conflict.Kind switch
-        {
-            ConflictKind.LineOnlyInA when side == AnnotatorSide.A =>
-                conflict.LineA?.OriginalIndex == token.OriginalLineIndex,
-
-            ConflictKind.LineOnlyInB when side == AnnotatorSide.B =>
-                conflict.LineB?.OriginalIndex == token.OriginalLineIndex,
-
-            ConflictKind.TextMismatch when side == AnnotatorSide.A =>
-                IsInLine(conflict.LineA, token) || conflict.TokensA.Contains(token),
-
-            ConflictKind.TextMismatch when side == AnnotatorSide.B =>
-                IsInLine(conflict.LineB, token) || conflict.TokensB.Contains(token),
-
-            ConflictKind.AnnotationMismatch when side == AnnotatorSide.A =>
-                ReferenceEquals(conflict.TokenA, token),
-
-            ConflictKind.AnnotationMismatch when side == AnnotatorSide.B =>
-                ReferenceEquals(conflict.TokenB, token),
-
-            ConflictKind.AnnotationSpanOnlyInA when side == AnnotatorSide.A =>
-                IsInNormalizedSpan(conflict.NormalizedSpanA, token),
-
-            ConflictKind.AnnotationSpanOnlyInB when side == AnnotatorSide.B =>
-                IsInNormalizedSpan(conflict.NormalizedSpanB, token),
-
-            _ => false
-        };
-    }
-
-    private static bool IsInLine(CurationLine? line, CurationToken token)
-    {
-        return line?.OriginalIndex == token.OriginalLineIndex;
-    }
-
-    private static bool IsInNormalizedSpan(NormalizedAnnotationSpan? span, CurationToken token)
-    {
-        if (span is null || span.LineIndex != token.OriginalLineIndex)
-            return false;
-
-        return token.OriginalTokenIndex >= span.StartPosition &&
-               token.OriginalTokenIndex < span.EndPosition;
-    }
+    private sealed record TokenReplacement(
+        int Start,
+        int End,
+        IReadOnlyList<CurationToken> Tokens);
 }

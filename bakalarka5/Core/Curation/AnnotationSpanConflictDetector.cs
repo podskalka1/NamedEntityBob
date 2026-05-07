@@ -21,6 +21,8 @@ public class AnnotationSpanConflictDetector
 
         var keysA = spansA.ToDictionary(s => s.Key);
         var keysB = spansB.ToDictionary(s => s.Key);
+        var rangeKeysA = spansA.Select(s => s.RangeKey).ToHashSet();
+        var rangeKeysB = spansB.Select(s => s.RangeKey).ToHashSet();
 
         var conflicts = new List<CurationConflict>();
 
@@ -28,6 +30,9 @@ public class AnnotationSpanConflictDetector
         {
             if (!keysB.ContainsKey(spanA.Key))
             {
+                if (rangeKeysB.Contains(spanA.RangeKey))
+                    continue;
+
                 conflicts.Add(new CurationConflict
                 {
                     Kind = ConflictKind.AnnotationSpanOnlyInA,
@@ -40,6 +45,9 @@ public class AnnotationSpanConflictDetector
         {
             if (!keysA.ContainsKey(spanB.Key))
             {
+                if (rangeKeysA.Contains(spanB.RangeKey))
+                    continue;
+
                 conflicts.Add(new CurationConflict
                 {
                     Kind = ConflictKind.AnnotationSpanOnlyInB,

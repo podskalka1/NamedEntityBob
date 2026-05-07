@@ -15,4 +15,9 @@ public class TokenPositionMap
     {
         return _positions[token];
     }
+
+    public bool TryGet(CurationToken token, out int position)
+    {
+        return _positions.TryGetValue(token, out position);
+    }
 }

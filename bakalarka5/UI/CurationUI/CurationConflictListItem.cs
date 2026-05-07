@@ -1,3 +1,4 @@
+using Avalonia.Media;
 using bakalarka5.Core.Curation;
 
 namespace bakalarka5.UI.CurationUI;
@@ -15,6 +16,11 @@ public class CurationConflictListItem
             return $"{Index + 1}. {Conflict.Kind} - {status}";
         }
     }
+
+    public IBrush Background =>
+        Conflict.IsResolved
+            ? new SolidColorBrush(Color.FromRgb(207, 232, 211))
+            : Brushes.Transparent;
 
     public CurationConflictListItem(CurationConflict conflict, int index)
     {
