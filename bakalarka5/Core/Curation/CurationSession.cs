@@ -61,6 +61,17 @@ public class CurationSession
         CurrentConflictIndex = Math.Min(previousIndex, Conflicts.Count - 1);
     }
 
+    public void ResolveAll(CurationResolutionKind resolution)
+    {
+        while (Conflicts.Count > 0)
+            ResolveCurrent(resolution);
+    }
+
+    public string SerializeCuratedDocument(string title = "Curated")
+    {
+        return CurationDocumentSerializer.Serialize(DocumentA, title);
+    }
+
     public void GoTo(int index)
     {
         if (index < 0 || index >= Conflicts.Count)
@@ -123,11 +134,6 @@ public class CurationSession
             ReplaceTokens(DocumentB, conflict.TokensB, conflict.TokensA, GetLineIndex(conflict, AnnotatorSide.B));
         else if (resolution == CurationResolutionKind.UseB)
             ReplaceTokens(DocumentA, conflict.TokensA, conflict.TokensB, GetLineIndex(conflict, AnnotatorSide.A));
-        else if (resolution == CurationResolutionKind.UseNeither)
-        {
-            ReplaceTokens(DocumentA, conflict.TokensA, [], GetLineIndex(conflict, AnnotatorSide.A));
-            ReplaceTokens(DocumentB, conflict.TokensB, [], GetLineIndex(conflict, AnnotatorSide.B));
-        }
     }
 
     private void ApplyAnnotationMismatchResolution(CurationConflict conflict, CurationResolutionKind resolution)
@@ -139,11 +145,6 @@ public class CurationSession
             ApplyAnnotationPathTypes(conflict.TokenB, conflict.TokenA.AnnotationPath);
         else if (resolution == CurationResolutionKind.UseB)
             ApplyAnnotationPathTypes(conflict.TokenA, conflict.TokenB.AnnotationPath);
-        else if (resolution == CurationResolutionKind.UseNeither)
-        {
-            conflict.TokenA.AnnotationPath.Clear();
-            conflict.TokenB.AnnotationPath.Clear();
-        }
     }
 
     private void ApplySpanResolution(

@@ -4,6 +4,5 @@ public enum CurationResolutionKind
 {
     Unresolved,
     UseA,
-    UseB,
-    UseNeither
+    UseB
 }

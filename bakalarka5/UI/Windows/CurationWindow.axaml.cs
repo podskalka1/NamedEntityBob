@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using bakalarka5.Core.Curation;
 using bakalarka5.Core.DocumentModel;
 using bakalarka5.UI.CurationUI;
@@ -11,10 +14,11 @@ namespace bakalarka5.UI.Windows;
 
 public partial class CurationWindow : Window
 {
-    private readonly CurationSession _session;
+    private CurationSession _session;
     private readonly ObservableCollection<CurationLineRowView> _rows = new();
 
     private CurationConflict? _lastSelectedConflict;
+    private string? _savePath;
 
     public CurationWindow(Document documentA, Document documentB)
     {
@@ -22,12 +26,17 @@ public partial class CurationWindow : Window
 
         _session = new CurationSession(documentA, documentB);
 
-        foreach (var row in BuildDocumentRows())
-            _rows.Add(row);
-
         DocumentRowsItemsControl.ItemsSource = _rows;
+        LoadSession(documentA, documentB);
+    }
 
+    private void LoadSession(Document documentA, Document documentB)
+    {
+        _session = new CurationSession(documentA, documentB);
+        _savePath = null;
+        _lastSelectedConflict = null;
         RefreshConflictList();
+        RefreshAllRows();
         ShowCurrentConflict();
     }
 
@@ -233,11 +242,6 @@ public partial class CurationWindow : Window
         ResolveCurrent(CurationResolutionKind.UseB);
     }
 
-    private void UseNeitherButton_OnClick(object? sender, RoutedEventArgs e)
-    {
-        ResolveCurrent(CurationResolutionKind.UseNeither);
-    }
-
     private void UseAFromContext_OnClick(object? sender, RoutedEventArgs e)
     {
         ResolveFromContext(sender, CurationResolutionKind.UseA);
@@ -246,11 +250,6 @@ public partial class CurationWindow : Window
     private void UseBFromContext_OnClick(object? sender, RoutedEventArgs e)
     {
         ResolveFromContext(sender, CurationResolutionKind.UseB);
-    }
-
-    private void UseNeitherFromContext_OnClick(object? sender, RoutedEventArgs e)
-    {
-        ResolveFromContext(sender, CurationResolutionKind.UseNeither);
     }
 
     private void CurationToken_OnPointerPressed(object? sender, PointerPressedEventArgs e)
@@ -300,5 +299,114 @@ public partial class CurationWindow : Window
             return placementTokenView;
 
         return null;
+    }
+
+    private async void FileOpenMenuItem(object? sender, RoutedEventArgs e)
+    {
+        var documents = await OpenCurationDocuments();
+        if (documents is null)
+            return;
+
+        LoadSession(documents.Value.A, documents.Value.B);
+    }
+
+    private async void FileSaveMenuItem(object? sender, RoutedEventArgs e)
+    {
+        if (_savePath is null)
+        {
+            await SaveAs();
+            return;
+        }
+
+        await SaveToPath(_savePath);
+    }
+
+    private async void FileSaveAsMenuItem(object? sender, RoutedEventArgs e)
+    {
+        await SaveAs();
+    }
+
+    private async Task SaveAs()
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null)
+            return;
+
+        var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+        {
+            Title = "Save curated document as",
+            SuggestedFileName = "curated.ne",
+            FileTypeChoices =
+            [
+                new FilePickerFileType("Named Entities")
+                {
+                    Patterns = ["*.ne"]
+                },
+                FilePickerFileTypes.All
+            ]
+        });
+
+        if (file is null)
+            return;
+
+        _savePath = file.Path.LocalPath;
+        await SaveToPath(_savePath);
+    }
+
+    private async Task SaveToPath(string path)
+    {
+        if (!await ResolveRemainingConflictsForSave())
+            return;
+
+        await File.WriteAllTextAsync(path, _session.SerializeCuratedDocument());
+    }
+
+    private async Task<bool> ResolveRemainingConflictsForSave()
+    {
+        if (_session.Conflicts.Count == 0)
+            return true;
+
+        var dialog = new ResolveRemainingConflictsWindow(_session.Conflicts.Count);
+        var resolution = await dialog.ShowDialog<CurationResolutionKind?>(this);
+
+        if (resolution is null)
+            return false;
+
+        _session.ResolveAll(resolution.Value);
+        _lastSelectedConflict = null;
+        RefreshConflictList();
+        RefreshAllRows();
+        ShowCurrentConflict();
+
+        return true;
+    }
+
+    private async Task<(Document A, Document B)?> OpenCurationDocuments()
+    {
+        var topLevel = TopLevel.GetTopLevel(this);
+        if (topLevel is null)
+            return null;
+
+        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = "Select two annotation files",
+            AllowMultiple = true,
+            FileTypeFilter =
+            [
+                new FilePickerFileType("Named Entities")
+                {
+                    Patterns = ["*.ne"]
+                },
+                FilePickerFileTypes.All
+            ]
+        });
+
+        if (files.Count < 2)
+            return null;
+
+        var documentA = await Document.OpenDocument(files[0].Path.LocalPath);
+        var documentB = await Document.OpenDocument(files[1].Path.LocalPath);
+
+        return (documentA, documentB);
     }
 }

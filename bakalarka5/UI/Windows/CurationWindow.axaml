@@ -26,7 +26,6 @@
                     <ContextMenu>
                         <MenuItem Header="Use A" Click="UseAFromContext_OnClick"/>
                         <MenuItem Header="Use B" Click="UseBFromContext_OnClick"/>
-                        <MenuItem Header="Use neither" Click="UseNeitherFromContext_OnClick"/>
                     </ContextMenu>
                 </Border.ContextMenu>
 
@@ -78,9 +77,18 @@
         </DataTemplate>
     </Window.DataTemplates>
 
-    <Grid RowDefinitions="Auto,*,Auto"
-          ColumnDefinitions="280,*"
-          Margin="12">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Header="_Open..." Click="FileOpenMenuItem"/>
+                <MenuItem Header="_Save" Click="FileSaveMenuItem"/>
+                <MenuItem Header="Save _As..." Click="FileSaveAsMenuItem"/>
+            </MenuItem>
+        </Menu>
+
+        <Grid RowDefinitions="Auto,*,Auto"
+              ColumnDefinitions="280,*"
+              Margin="12">
 
         <TextBlock Grid.Row="0"
                    Grid.ColumnSpan="2"
@@ -145,7 +153,7 @@
 
             <Button Content="Use A" Click="UseAButton_OnClick"/>
             <Button Content="Use B" Click="UseBButton_OnClick"/>
-            <Button Content="Use neither" Click="UseNeitherButton_OnClick"/>
         </StackPanel>
-    </Grid>
+        </Grid>
+    </DockPanel>
 </Window>
