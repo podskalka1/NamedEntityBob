@@ -13,6 +13,8 @@ public class CurationSession
     public List<LineAlignment> LineAlignments { get; private set; } = new();
     public List<CurationConflict> Conflicts { get; private set; } = new();
 
+    private List<CurationConflict> _allConflicts = new();
+
     public int CurrentConflictIndex { get; private set; }
 
     public CurationConflict? CurrentConflict =>
@@ -23,7 +25,7 @@ public class CurationSession
         DocumentA = CurationDocumentFactory.FromDocument(documentA, AnnotatorSide.A);
         DocumentB = CurationDocumentFactory.FromDocument(documentB, AnnotatorSide.B);
 
-        RebuildConflicts();
+        RebuildAllConflicts();
     }
 
     public void Next()
@@ -49,8 +51,14 @@ public class CurationSession
             return;
 
         var previousIndex = CurrentConflictIndex;
+        var alignmentIndex = FindAlignmentIndex(conflict);
+
         ApplyResolution(conflict, resolution);
-        RebuildConflicts();
+
+        if (alignmentIndex >= 0)
+            RebuildConflictsForLine(alignmentIndex);
+        else
+            RebuildAllConflicts();
 
         if (Conflicts.Count == 0)
         {
@@ -80,7 +88,7 @@ public class CurationSession
         CurrentConflictIndex = index;
     }
 
-    private void RebuildConflicts()
+    private void RebuildAllConflicts()
     {
         LineAlignments = new DocumentAligner().AlignLines(DocumentA, DocumentB);
 
@@ -90,14 +98,128 @@ public class CurationSession
         var spanConflicts = new AnnotationSpanConflictDetector()
             .Detect(DocumentA, DocumentB, LineAlignments);
 
-        Conflicts = textConflicts
+        _allConflicts = textConflicts
             .Concat(spanConflicts)
             .ToList();
+
+        RefreshVisibleConflicts();
+    }
+
+    private void RebuildConflictsForLine(int alignmentIndex)
+    {
+        if (alignmentIndex < 0 || alignmentIndex >= LineAlignments.Count)
+        {
+            RebuildAllConflicts();
+            return;
+        }
+
+        var alignment = RebuildLineAlignment(LineAlignments[alignmentIndex]);
+        LineAlignments[alignmentIndex] = alignment;
+
+        _allConflicts = _allConflicts
+            .Where(conflict => !BelongsToAlignment(conflict, alignmentIndex))
+            .ToList();
+
+        var lineAlignments = new List<LineAlignment> { alignment };
+
+        _allConflicts.AddRange(new ConflictDetector().Detect(lineAlignments));
+        _allConflicts.AddRange(new AnnotationSpanConflictDetector().Detect(
+            DocumentA,
+            DocumentB,
+            lineAlignments));
+
+        RefreshVisibleConflicts();
+    }
+
+    private void RefreshVisibleConflicts()
+    {
+        _allConflicts = SortConflictsByLine(_allConflicts);
+
+        var textMismatches = _allConflicts
+            .Where(conflict => conflict.Kind == ConflictKind.TextMismatch)
+            .ToList();
+
+        Conflicts = textMismatches.Count > 0
+            ? textMismatches
+            : _allConflicts;
 
         if (Conflicts.Count == 0)
             CurrentConflictIndex = 0;
         else
             CurrentConflictIndex = Math.Min(CurrentConflictIndex, Conflicts.Count - 1);
+    }
+
+    private List<CurationConflict> SortConflictsByLine(IEnumerable<CurationConflict> conflicts)
+    {
+        return conflicts
+            .OrderBy(GetAlignmentSortIndex)
+            .ToList();
+    }
+
+    private static LineAlignment RebuildLineAlignment(LineAlignment alignment)
+    {
+        if (alignment.A is null)
+            return new LineAlignment { A = null, B = alignment.B, Kind = AlignmentKind.OnlyInB };
+
+        if (alignment.B is null)
+            return new LineAlignment { A = alignment.A, B = null, Kind = AlignmentKind.OnlyInA };
+
+        return new LineAlignment
+        {
+            A = alignment.A,
+            B = alignment.B,
+            Kind = alignment.A.PlainText == alignment.B.PlainText
+                ? AlignmentKind.Same
+                : AlignmentKind.Different
+        };
+    }
+
+    private int FindAlignmentIndex(CurationConflict conflict)
+    {
+        for (var index = 0; index < LineAlignments.Count; index++)
+        {
+            if (BelongsToAlignment(conflict, index))
+                return index;
+        }
+
+        return -1;
+    }
+
+    private int GetAlignmentSortIndex(CurationConflict conflict)
+    {
+        var index = FindAlignmentIndex(conflict);
+        return index >= 0 ? index : int.MaxValue;
+    }
+
+    private bool BelongsToAlignment(CurationConflict conflict, int alignmentIndex)
+    {
+        var alignment = LineAlignments[alignmentIndex];
+        var lineAIndex = alignment.A?.OriginalIndex;
+        var lineBIndex = alignment.B?.OriginalIndex;
+
+        return MatchesLine(conflict.LineA, lineAIndex) ||
+               MatchesLine(conflict.LineB, lineBIndex) ||
+               MatchesToken(conflict.TokenA, lineAIndex) ||
+               MatchesToken(conflict.TokenB, lineBIndex) ||
+               conflict.TokensA.Any(token => MatchesToken(token, lineAIndex)) ||
+               conflict.TokensB.Any(token => MatchesToken(token, lineBIndex)) ||
+               MatchesSpan(conflict.NormalizedSpanA, lineAIndex) ||
+               MatchesSpan(conflict.NormalizedSpanB, lineBIndex);
+    }
+
+    private static bool MatchesLine(CurationLine? line, int? lineIndex)
+    {
+        return line is not null && line.OriginalIndex == lineIndex;
+    }
+
+    private static bool MatchesToken(CurationToken? token, int? lineIndex)
+    {
+        return token is not null && token.OriginalLineIndex == lineIndex;
+    }
+
+    private static bool MatchesSpan(NormalizedAnnotationSpan? span, int? lineIndex)
+    {
+        return span is not null && span.LineIndex == lineIndex;
     }
 
     private void ApplyResolution(CurationConflict conflict, CurationResolutionKind resolution)

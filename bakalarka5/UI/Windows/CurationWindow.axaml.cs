@@ -6,6 +6,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using bakalarka5.Core.Curation;
 using bakalarka5.Core.DocumentModel;
 using bakalarka5.UI.CurationUI;
@@ -102,6 +103,7 @@ public partial class CurationWindow : Window
         RefreshRowsForSelectionChange(_lastSelectedConflict, conflict);
         _lastSelectedConflict = conflict;
         SelectCurrentConflictListItem();
+        ScrollCurrentConflictIntoView();
     }
 
     private void RefreshRowsForSelectionChange(
@@ -167,7 +169,7 @@ public partial class CurationWindow : Window
 
         for (var rowIndex = 0; rowIndex < _rows.Count; rowIndex++)
         {
-            if (ReferenceEquals(_rows[rowIndex].Alignment, alignment))
+            if (MatchesAlignment(_rows[rowIndex].Alignment, alignment))
                 return rowIndex;
         }
 
@@ -178,12 +180,29 @@ public partial class CurationWindow : Window
     {
         for (var rowIndex = 0; rowIndex < _rows.Count; rowIndex++)
         {
-            var rowAlignmentIndex = _session.LineAlignments.IndexOf(_rows[rowIndex].Alignment);
+            var rowAlignmentIndex = FindAlignmentIndex(_rows[rowIndex].Alignment);
             if (rowAlignmentIndex > alignmentIndex)
                 return rowIndex;
         }
 
         return _rows.Count;
+    }
+
+    private int FindAlignmentIndex(LineAlignment alignment)
+    {
+        for (var index = 0; index < _session.LineAlignments.Count; index++)
+        {
+            if (MatchesAlignment(alignment, _session.LineAlignments[index]))
+                return index;
+        }
+
+        return -1;
+    }
+
+    private static bool MatchesAlignment(LineAlignment left, LineAlignment right)
+    {
+        return left.A?.OriginalIndex == right.A?.OriginalIndex &&
+               left.B?.OriginalIndex == right.B?.OriginalIndex;
     }
 
     private static bool IsDisplayable(CurationLineRowView row)
@@ -205,6 +224,27 @@ public partial class CurationWindow : Window
                 return;
             }
         }
+    }
+
+    private void ScrollCurrentConflictIntoView()
+    {
+        var conflict = _session.CurrentConflict;
+        if (conflict is null)
+            return;
+
+        var rowIndex = FindRowIndex(conflict);
+        if (rowIndex < 0)
+            return;
+
+        var visibleIndex = FindVisibleRowIndex(rowIndex);
+        if (visibleIndex < 0)
+            return;
+
+        Dispatcher.UIThread.Post(() =>
+        {
+            var container = DocumentRowsItemsControl.ContainerFromIndex(visibleIndex);
+            container?.BringIntoView();
+        }, DispatcherPriority.Loaded);
     }
 
     private void ConflictListBox_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
@@ -267,10 +307,14 @@ public partial class CurationWindow : Window
 
     private void ResolveCurrent(CurationResolutionKind resolution)
     {
+        var resolvedRowIndex = _session.CurrentConflict is null
+            ? -1
+            : FindRowIndex(_session.CurrentConflict);
+
         _session.ResolveCurrent(resolution);
         _lastSelectedConflict = null;
         RefreshConflictList();
-        RefreshAllRows();
+        ReplaceRow(resolvedRowIndex);
         ShowCurrentConflict();
     }
 
