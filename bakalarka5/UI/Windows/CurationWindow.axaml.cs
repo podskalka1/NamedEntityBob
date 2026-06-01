@@ -347,7 +347,7 @@ public partial class CurationWindow : Window
 
     private async void FileOpenMenuItem(object? sender, RoutedEventArgs e)
     {
-        var documents = await OpenCurationDocuments();
+        var documents = await CurationDocumentPicker.PickDocuments(this);
         if (documents is null)
             return;
 
@@ -425,32 +425,4 @@ public partial class CurationWindow : Window
         return true;
     }
 
-    private async Task<(Document A, Document B)?> OpenCurationDocuments()
-    {
-        var topLevel = TopLevel.GetTopLevel(this);
-        if (topLevel is null)
-            return null;
-
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-        {
-            Title = "Select two annotation files",
-            AllowMultiple = true,
-            FileTypeFilter =
-            [
-                new FilePickerFileType("Named Entities")
-                {
-                    Patterns = ["*.ne"]
-                },
-                FilePickerFileTypes.All
-            ]
-        });
-
-        if (files.Count < 2)
-            return null;
-
-        var documentA = await Document.OpenDocument(files[0].Path.LocalPath);
-        var documentB = await Document.OpenDocument(files[1].Path.LocalPath);
-
-        return (documentA, documentB);
-    }
 }
